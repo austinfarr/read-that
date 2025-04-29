@@ -1,6 +1,8 @@
-import MyBooksList from "@/components/MyBooksList";
-import { getBooks } from "@/lib/db/actions";
-import React from "react";
+import MyBooksList from '@/components/MyBooksList';
+import { getBooks } from '@/lib/db/actions';
+import React from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default async function MyBooksPage() {
   const books = await getBooks();
