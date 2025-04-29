@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 // import { randomUUID } from "crypto";
 import { usePathname } from "next/navigation";
+import SearchBar from "../SearchBar";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
@@ -39,6 +40,8 @@ const Navbar = ({}) => {
           <a href="/explore">Explore</a>
         </li>
       </ul>
+
+      <SearchBar />
 
       <div className="flex items-center">
         <Button variant="secondary" className="hidden md:block px-2">

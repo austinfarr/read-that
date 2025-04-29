@@ -3,7 +3,26 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["m.media-amazon.com", "mpd-biblio-covers.imgix.net"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "books.google.com",
+        port: "",
+        pathname: "/books/content/**",
+      },
+      {
+        protocol: "http",
+        hostname: "books.google.com",
+        port: "",
+        pathname: "/books/publisher/content/images/frontcover/**",
+      },
+      {
+        protocol: "http",
+        hostname: "books.google.com",
+        port: "",
+        pathname: "/books/publisher/**",
+      },
+    ],
   },
 };
 
