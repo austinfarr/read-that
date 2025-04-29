@@ -25,19 +25,20 @@ const Navbar = ({}) => {
         {/* Logo here */}
         <ul className="hidden md:flex items-center gap-10 text-card-foreground">
           <p className="text-2xl font-bold text-primary">ReadThat</p>
-          <li
-            className={`text-primary font-medium ${
-              pathname === '/' ? 'text-primary' : 'text-black'
-            }`}
-          >
-            <Link href="/">Home</Link>
-          </li>
+
           <li
             className={`text-primary font-medium ${
               pathname === '/explore' ? 'text-primary' : 'text-black'
             }`}
           >
             <a href="/explore">Explore</a>
+          </li>
+          <li
+            className={`text-primary font-medium ${
+              pathname === '/' ? 'text-primary' : 'text-black'
+            }`}
+          >
+            <Link href="/">My Books</Link>
           </li>
         </ul>
 

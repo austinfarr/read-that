@@ -22,6 +22,30 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/books/publisher/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'm.media-amazon.com',
+        port: '',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+        port: '',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mpd-biblio-covers.imgix.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.hardcover.app',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   typescript: {
@@ -36,6 +60,9 @@ const nextConfig: NextConfig = {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
+  },
+  env: {
+    HARDCOVER_API_TOKEN: process.env.HARDCOVER_API_TOKEN,
   },
 };
 

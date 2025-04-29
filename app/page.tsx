@@ -1,11 +1,7 @@
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { Button } from "@/components/ui/button";
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <div>
-      <ThemeToggle />
-      <Button>Click me</Button>
-    </div>
-  );
+  redirect('/explore');
+
+  return <div></div>;
 }
