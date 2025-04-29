@@ -1,52 +1,80 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import debounce from "lodash/debounce";
-import { Search } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import debounce from 'lodash/debounce';
+import { Search } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { gql, useLazyQuery } from '@apollo/client';
 
-interface BookResult {
+const SEARCH_BOOKS = gql`
+  query SearchBooks($query: String!) {
+    search(query: $query, query_type: "Title", per_page: 5, page: 1) {
+      results
+    }
+  }
+`;
+
+// Represents the structure of a book document from Hardcover's API
+interface BookDocument {
   id: string;
-  volumeInfo: {
-    title: string;
-    authors?: string[];
-    imageLinks?: {
-      thumbnail: string;
-    };
+  title: string;
+  author_names?: string[];
+  image?: {
+    url: string;
+  };
+}
+
+// Each search result is a hit with a document property
+interface BookHit {
+  document: BookDocument;
+}
+
+// The results property contains an array of hits
+interface SearchResults {
+  hits: BookHit[];
+}
+
+// Complete response structure from the GraphQL query
+interface SearchResponse {
+  search: {
+    results: SearchResults;
   };
 }
 
 export function SearchBar() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<BookResult[]>([]);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<BookHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
   const router = useRouter();
 
+  console.log('Results:', results);
+
   // Debounced search function
+
+  const [searchBooks, { loading, data }] = useLazyQuery<SearchResponse>(
+    SEARCH_BOOKS,
+    {
+      fetchPolicy: 'network-only', // Don't cache results
+      onCompleted: (data) => {
+        console.log('Search completed DATA:', data);
+        console.log('Search completed:', data.search.results.hits);
+        if (data && data.search && data.search.results) {
+          setResults(data.search.results.hits);
+        }
+      },
+    }
+  );
+
   const debouncedSearch = debounce(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
-          searchQuery
-        )}&maxResults=5`
-      );
-      const data = await response.json();
-      setResults(data.items || []);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
+    searchBooks({ variables: { query: searchQuery } });
   }, 300);
 
   useEffect(() => {
@@ -55,6 +83,9 @@ export function SearchBar() {
     } else {
       setResults([]);
     }
+
+    console.log('Query:', query);
+    console.log('Results:', results);
 
     return () => {
       debouncedSearch.cancel();
@@ -90,34 +121,37 @@ export function SearchBar() {
               <div className="space-y-2">
                 {results.map((book) => (
                   <div
-                    key={book.id}
+                    key={book.document.id}
                     className="flex items-center gap-3 p-2 hover:bg-accent rounded-md cursor-pointer"
                     onClick={() => {
-                      router.push(`/books/${book.id}`);
+                      router.push(`/books/${book.document.id}`);
                       setShowResults(false);
-                      setQuery("");
+                      setQuery('');
                     }}
                   >
-                    {book.volumeInfo.imageLinks?.thumbnail ? (
+                    {/* <div className="w-10 h-[60px] bg-muted rounded flex items-center justify-center">
+                      <Search className="h-4 w-4" />
+                    </div> */}
+
+                    {book.document.image?.url ? (
                       <Image
-                        src={book.volumeInfo.imageLinks.thumbnail}
-                        alt={book.volumeInfo.title}
+                        src={book.document.image.url}
+                        alt={book.document.title}
                         width={50}
                         height={75}
                         className="object-cover rounded"
                       />
                     ) : (
-                      <div className="w-10 h-[60px] bg-muted rounded flex items-center justify-center">
-                        <Search className="h-4 w-4" />
-                      </div>
+                      <div className="h-[75px] w-[50px] bg-muted rounded flex items-center justify-center" />
                     )}
+
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
-                        {book.volumeInfo.title}
+                        {book.document.title}
                       </p>
-                      {book.volumeInfo.authors && (
+                      {book.document.author_names && (
                         <p className="text-xs text-muted-foreground truncate">
-                          {book.volumeInfo.authors.join(", ")}
+                          {book.document.author_names.join(', ')}
                         </p>
                       )}
                     </div>
