@@ -1,44 +1,43 @@
-import { Card, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { BookDescription } from '@/components/BookDescription';
-import { notFound } from 'next/navigation';
+import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
+import { BookDescription } from "@/components/BookDescription";
+import { notFound } from "next/navigation";
 
 // Function to fetch book details from Hardcover API
 async function getBookDetails(id: string) {
-  console.log('Fetching book details for ID:', id);
+  console.log("Fetching book details for ID:", id);
   const query = `
-    query GetSpecificEdition {
-  editions(where: {id: {_eq: 21953653}}) {
-      book {
-          title
-          release_date
-          slug
-          subtitle
-        	pages
-          description
-          image {
-              url
+    query GetBookById($id: Int!) {
+      books(where: {id: {_eq: $id}}) {
+        title
+        release_date
+        slug
+        subtitle
+        pages
+        description
+        image {
+          url
+        }
+        contributions {
+          author {
+            name
           }
-        	
-          contributions {
-              author {
-                  name
-              }
-          }
+        }
       }
-  }
-}
+    }
   `;
 
   // Make the GraphQL request to Hardcover
-  const response = await fetch('https://api.hardcover.app/v1/graphql', {
-    method: 'POST',
+  const response = await fetch("https://api.hardcover.app/v1/graphql", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
     },
-    body: JSON.stringify({ query }),
-    // next: { revalidate: 3600 }, // Cache for 1 hour
+    body: JSON.stringify({
+      query,
+      variables: { id: parseInt(id) },
+    }),
   });
 
   if (!response.ok) {
@@ -46,21 +45,21 @@ async function getBookDetails(id: string) {
   }
 
   const data = await response.json();
-  console.log('GraphQL response:', data);
+  console.log("GraphQL response:", data);
 
   // Handle errors in the GraphQL response
   if (data.errors) {
-    console.error('GraphQL errors:', data.errors);
-    throw new Error('Failed to fetch book details from Hardcover');
+    console.error("GraphQL errors:", data.errors);
+    throw new Error("Failed to fetch book details from Hardcover");
   }
 
-  // If no editions found, return null
-  if (!data.data.editions || data.data.editions.length === 0) {
+  // If no books found, return null
+  if (!data.data.books || data.data.books.length === 0) {
     return null;
   }
 
-  // Get the first edition's book data
-  return data.data.editions[0].book;
+  // Get the first book data
+  return data.data.books[0];
 }
 
 export default async function BookPage({ params }: { params: { id: string } }) {
@@ -75,10 +74,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
   // Extract authors from contributions
   const authors = book.contributions
     ?.filter((contribution) => contribution.author)
-    .map((contribution) => contribution.author.name) || ['Unknown Author'];
-
-  // Extract genres from cached_tags
-  const genres = book.cached_tags?.['Genre'] || [];
+    .map((contribution) => contribution.author.name) || ["Unknown Author"];
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -111,27 +107,20 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                 </h2>
               )}
               <p className="text-lg text-muted-foreground mb-4">
-                by {authors.join(', ')}
+                by {authors.join(", ")}
               </p>
 
               {/* Book metadata */}
               <div className="grid grid-cols-2 gap-4 text-sm mb-6">
                 {book.release_date && (
                   <div>
-                    <span className="font-semibold">Published:</span>{' '}
+                    <span className="font-semibold">Published:</span>{" "}
                     {new Date(book.release_date).toLocaleDateString()}
                   </div>
                 )}
-                {book.page_count && (
+                {book.pages && (
                   <div>
-                    <span className="font-semibold">Pages:</span>{' '}
-                    {book.page_count}
-                  </div>
-                )}
-                {genres.length > 0 && (
-                  <div>
-                    <span className="font-semibold">Categories:</span>{' '}
-                    {genres.join(', ')}
+                    <span className="font-semibold">Pages:</span> {book.pages}
                   </div>
                 )}
               </div>
