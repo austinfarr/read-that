@@ -1,14 +1,87 @@
 "use client";
 import BookCard from "@/components/BookCard";
 import { HardcoverBook, Book } from "@/types/book";
+import { CategorizedBooks } from "@/lib/hardcover-api";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ExploreClientPageProps {
-  books: HardcoverBook[];
+  categorizedBooks: CategorizedBooks;
 }
 
-export default function ExploreClientPage({ books }: ExploreClientPageProps) {
+// Scrollable book section component
+function ScrollableBookSection({ 
+  title, 
+  books, 
+  onBookClick 
+}: { 
+  title: string; 
+  books: HardcoverBook[]; 
+  onBookClick: (book: Book) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -220, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 220, behavior: 'smooth' });
+    }
+  };
+
+  if (books.length === 0) return null;
+
+  return (
+    <div className="mb-12">
+      <h2 className="text-2xl font-semibold mb-6">{title}</h2>
+      <div className="relative scroll-section-container group/scroll">
+        {/* Left Arrow */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-border/50 opacity-0 group-hover/scroll:opacity-100 transition-opacity duration-200"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        {/* Right Arrow */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-border/50 opacity-0 group-hover/scroll:opacity-100 transition-opacity duration-200"
+          onClick={scrollRight}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        {/* Scrollable container */}
+        <div 
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide px-8"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {books.map((book) => (
+            <div key={book.id} className="flex-shrink-0">
+              <BookCard 
+                book={book} 
+                onClick={onBookClick}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ExploreClientPage({ categorizedBooks }: ExploreClientPageProps) {
   const router = useRouter();
 
   const handleBookClick = (book: Book) => {
@@ -20,37 +93,29 @@ export default function ExploreClientPage({ books }: ExploreClientPageProps) {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Discover Your Next Great Read</h1>
-        <p className="text-muted-foreground">Handpicked recommendations based on popular favorites</p>
+        <p className="text-muted-foreground">Handpicked recommendations across different genres</p>
       </div>
 
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Science Fiction & Fantasy</h2>
-        <div className="flex gap-6 w-full flex-wrap justify-center sm:justify-start">
-          {books.slice(0, 3).map((book) => (
-            <BookCard 
-              key={book.id} 
-              book={book} 
-              onClick={handleBookClick}
-            />
-          ))}
-        </div>
-      </div>
+      <ScrollableBookSection 
+        title="Science Fiction & Fantasy"
+        books={categorizedBooks.sciFiFantasy}
+        onBookClick={handleBookClick}
+      />
 
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">More Great Reads</h2>
-        <div className="flex gap-6 w-full flex-wrap justify-center sm:justify-start">
-          {books.slice(3).map((book) => (
-            <BookCard 
-              key={book.id} 
-              book={book} 
-              onClick={handleBookClick}
-            />
-          ))}
-        </div>
-      </div>
+      <ScrollableBookSection 
+        title="Classic Literature"
+        books={categorizedBooks.classicLiterature}
+        onBookClick={handleBookClick}
+      />
+
+      <ScrollableBookSection 
+        title="Modern Fiction"
+        books={categorizedBooks.modernFiction}
+        onBookClick={handleBookClick}
+      />
 
       <div className="text-center py-8">
-        <p className="text-muted-foreground">More recommendations coming soon...</p>
+        <p className="text-muted-foreground">Enjoying these recommendations? More categories coming soon!</p>
       </div>
     </div>
   );
