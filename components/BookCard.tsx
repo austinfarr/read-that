@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import { Card } from "./ui/card";
 import { useState } from "react";
 import { Book, normalizeBook, HardcoverBook, HardcoverSearchBook, LocalBook } from "@/types/book";
 import { BookOpen, ImageIcon } from "lucide-react";
@@ -39,11 +38,11 @@ export default function BookCard({ book, onClick, className = "" }: BookCardProp
   return (
     <div 
       className={`p-[2px] rounded-lg group bg-transparent transition-all duration-300 hover:bg-gradient-to-r hover:from-teal-400 hover:via-blue-500 hover:to-purple-500 ${
-        onClick ? 'cursor-pointer' : ''
+        onClick ? 'cursor-pointer' : 'cursor-default'
       } ${className}`}
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-lg transition-all duration-300 w-[200px] bg-gray-950">
+      <div className={`relative overflow-hidden rounded-lg transition-all duration-300 w-[200px] bg-gray-950 ${onClick ? 'cursor-pointer' : 'cursor-default'}`}>
         <div className="relative w-full h-[300px]">
           {/* Image or placeholder */}
           {normalizedBook.imageUrl && !hasError ? (

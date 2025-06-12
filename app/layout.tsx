@@ -3,8 +3,6 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
-import { ApolloProvider } from '@apollo/client';
-import client from '@/lib/apollo-client';
 import ApolloClientProvider from '@/components/providers/ApolloClientProvider';
 
 const geistSans = Geist({
