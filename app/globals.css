@@ -136,4 +136,9 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Utility for pages with overlay navigation */
+  .page-with-overlay-nav {
+    @apply pt-20;
+  }
 }

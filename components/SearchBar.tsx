@@ -4,7 +4,7 @@ import debounce from 'lodash/debounce';
 import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
 
 const SEARCH_BOOKS = gql`
@@ -45,22 +45,16 @@ interface SearchResponse {
 export function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<BookHit[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
   const router = useRouter();
 
-  console.log('Results:', results);
-
-  // Debounced search function
-
-  const [searchBooks, { loading, data }] = useLazyQuery<SearchResponse>(
+  const [searchBooks, { loading: isLoading }] = useLazyQuery<SearchResponse>(
     SEARCH_BOOKS,
     {
       fetchPolicy: 'network-only', // Don't cache results
       onCompleted: (data) => {
-        console.log('Search completed DATA:', data);
-        console.log('Search completed:', data.search.results.hits);
+        console.log('Search completed:', data);
         if (data && data.search && data.search.results) {
           setResults(data.search.results.hits);
         }
@@ -68,14 +62,17 @@ export function SearchBar() {
     }
   );
 
-  const debouncedSearch = debounce(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    searchBooks({ variables: { query: searchQuery } });
-  }, 300);
+  // Memoize the debounced search function to prevent recreation on every render
+  const debouncedSearch = useMemo(
+    () => debounce((searchQuery: string) => {
+      if (!searchQuery.trim()) {
+        setResults([]);
+        return;
+      }
+      searchBooks({ variables: { query: searchQuery } });
+    }, 300),
+    [searchBooks]
+  );
 
   useEffect(() => {
     if (query) {
@@ -84,13 +81,10 @@ export function SearchBar() {
       setResults([]);
     }
 
-    console.log('Query:', query);
-    console.log('Results:', results);
-
     return () => {
       debouncedSearch.cancel();
     };
-  }, [query]);
+  }, [query, debouncedSearch]);
 
   return (
     <div className="relative w-[800px] max-w-sm">

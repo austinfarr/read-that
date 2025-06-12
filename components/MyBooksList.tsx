@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import Image from "next/image";
-import BookCard from "./BookCard";
 import ReadBookCard from "./ReadBookCard";
 
 interface MyBooksListProps {

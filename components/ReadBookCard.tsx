@@ -1,8 +1,6 @@
 import Image from "next/image";
-import { useState } from "react";
 
 export default function ReadBookCard({ book }) {
-  const [isLoading, setIsLoading] = useState(true);
 
   return (
     // Main container - full width with flex layout
@@ -25,7 +23,6 @@ export default function ReadBookCard({ book }) {
                   fill
                   // sizes="(max-width: 768px) 100vw, 200px"
                   priority
-                  onLoad={() => setIsLoading(false)}
                 />
                 {/* Hover overlay with title */}
                 <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 overflow-hidden rounded-lg backdrop-blur-md bg-white/10 opacity-0 transition-all duration-300 group-hover:opacity-100">

@@ -77,7 +77,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     .map((contribution) => contribution.author.name) || ["Unknown Author"];
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto pt-24 pb-8 px-4">
       <Card className="max-w-4xl mx-auto">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-8">
