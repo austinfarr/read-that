@@ -10,7 +10,9 @@ interface ExploreClientPageProps {
   categorizedBooks: CategorizedBooks;
 }
 
-export default function ExploreClientPage({ categorizedBooks }: ExploreClientPageProps) {
+export default function ExploreClientPage({
+  categorizedBooks,
+}: ExploreClientPageProps) {
   const router = useRouter();
 
   const handleBookClick = (book: Book) => {
@@ -29,8 +31,8 @@ export default function ExploreClientPage({ categorizedBooks }: ExploreClientPag
           <div className="absolute top-40 left-1/3 w-1.5 h-1.5 bg-teal-400 dark:bg-teal-400 rounded-full animate-pulse delay-700" />
           <div className="absolute top-28 right-1/4 w-1 h-1 bg-yellow-400 dark:bg-yellow-400 rounded-full animate-pulse delay-1000" />
         </div>
-        
-        <div className="container mx-auto py-16 px-4 relative">
+
+        <div className="container mx-auto pt-32 pb-8 px-4 relative">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
               <Sparkles className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
@@ -43,11 +45,14 @@ export default function ExploreClientPage({ categorizedBooks }: ExploreClientPag
               Great Read
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Curated collections of extraordinary books across genres, 
-              <span className="text-teal-600 dark:text-teal-300 font-medium"> handpicked </span>
+              Curated collections of extraordinary books across genres,
+              <span className="text-teal-600 dark:text-teal-300 font-medium">
+                {" "}
+                handpicked{" "}
+              </span>
               just for curious minds like yours
             </p>
-            
+
             {/* Stats */}
             <div className="flex items-center justify-center gap-8 mt-8">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -66,23 +71,22 @@ export default function ExploreClientPage({ categorizedBooks }: ExploreClientPag
           </div>
         </div>
       </div>
-      
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-16">
 
-        <ScrollableBookSection 
+      {/* Main Content */}
+      <div className="container mx-auto px-4 pb-16 mt-4">
+        <ScrollableBookSection
           title="Science Fiction & Fantasy"
           books={categorizedBooks.sciFiFantasy}
           onBookClick={handleBookClick}
         />
 
-        <ScrollableBookSection 
+        <ScrollableBookSection
           title="Classic Literature"
           books={categorizedBooks.classicLiterature}
           onBookClick={handleBookClick}
         />
 
-        <ScrollableBookSection 
+        <ScrollableBookSection
           title="Modern Fiction"
           books={categorizedBooks.modernFiction}
           onBookClick={handleBookClick}
@@ -96,8 +100,11 @@ export default function ExploreClientPage({ categorizedBooks }: ExploreClientPag
               More Amazing Collections Coming Soon
             </h3>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              We're constantly curating new collections of exceptional books. 
-              <span className="text-teal-600 dark:text-teal-300 font-medium"> Stay tuned </span>
+              We're constantly curating new collections of exceptional books.
+              <span className="text-teal-600 dark:text-teal-300 font-medium">
+                {" "}
+                Stay tuned{" "}
+              </span>
               for mystery, romance, biographies, and so much more!
             </p>
           </div>

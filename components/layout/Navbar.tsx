@@ -20,22 +20,22 @@ const Navbar = ({}) => {
   const pathname = usePathname();
 
   return (
-    <div className="px-4 my-4">
-      <Card className="bg-card py-3 px-8 border-0 flex items-center justify-between gap-6 rounded-2xl mt-5">
+    <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
+      <Card className="bg-background/80 backdrop-blur-md py-3 px-8 border border-border/20 flex items-center justify-between gap-6 rounded-2xl shadow-lg">
         {/* Logo here */}
         <ul className="hidden md:flex items-center gap-10 text-card-foreground">
           <p className="text-2xl font-bold text-primary">ReadThat</p>
 
           <li
-            className={`text-primary font-medium ${
-              pathname === '/explore' ? 'text-primary' : 'text-black'
+            className={`font-medium ${
+              pathname === '/explore' ? 'text-primary' : 'text-foreground'
             }`}
           >
             <a href="/explore">Explore</a>
           </li>
           <li
-            className={`text-primary font-medium ${
-              pathname === '/' ? 'text-primary' : 'text-black'
+            className={`font-medium ${
+              pathname === '/' ? 'text-primary' : 'text-foreground'
             }`}
           >
             <Link href="/">My Books</Link>
