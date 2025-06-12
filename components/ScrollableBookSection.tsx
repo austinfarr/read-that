@@ -37,18 +37,18 @@ export default function ScrollableBookSection({
       {/* Section Header */}
       <div className="mb-8 relative">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-1 h-8 bg-gradient-to-b from-teal-400 to-purple-400 rounded-full" />
-          <h2 className="text-3xl font-bold text-white">{title}</h2>
-          <Sparkles className="w-6 h-6 text-teal-400 animate-pulse" />
+          <div className="w-1 h-8 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
+          <h2 className="text-3xl font-bold text-foreground">{title}</h2>
+          <Sparkles className="w-6 h-6 text-teal-500 dark:text-teal-400 animate-pulse" />
         </div>
-        <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-purple-400 rounded-full ml-7" />
+        <div className="w-24 h-1 bg-gradient-to-r from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full ml-7" />
       </div>
-      <div className="relative scroll-section-container group/scroll bg-gradient-to-r from-slate-800/30 via-slate-700/20 to-slate-800/30 rounded-2xl p-6 border border-slate-600/20 backdrop-blur-sm">
+      <div className="relative scroll-section-container group/scroll bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 rounded-2xl p-6 border border-border/20 backdrop-blur-sm">
         {/* Left Arrow */}
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-slate-900/90 backdrop-blur-sm border-teal-400/30 hover:border-teal-400 hover:bg-teal-400/10 text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
           onClick={scrollLeft}
         >
           <ChevronLeft className="h-5 w-5" />
@@ -58,7 +58,7 @@ export default function ScrollableBookSection({
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-slate-900/90 backdrop-blur-sm border-teal-400/30 hover:border-teal-400 hover:bg-teal-400/10 text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
           onClick={scrollRight}
         >
           <ChevronRight className="h-5 w-5" />
