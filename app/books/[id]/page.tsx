@@ -92,33 +92,20 @@ export default async function BookPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
-      {/* Hero Section with Book Cover Background */}
+      {/* Hero Section */}
       <div className="relative overflow-hidden">
-        {/* Blurred background image */}
-        {book.image?.url && (
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={book.image.url}
-              alt=""
-              fill
-              className="object-cover blur-3xl opacity-20 scale-110"
-              priority
-            />
-          </div>
-        )}
-
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background z-10" />
+        {/* Clean gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/20 to-background" />
 
         {/* Decorative elements */}
-        <div className="absolute inset-0 z-20">
+        <div className="absolute inset-0 z-10">
           <div className="absolute top-20 left-1/4 w-2 h-2 bg-teal-400 dark:bg-teal-400 rounded-full animate-pulse" />
           <div className="absolute top-32 right-1/3 w-1 h-1 bg-purple-400 dark:bg-purple-400 rounded-full animate-pulse delay-300" />
           <div className="absolute top-40 left-1/3 w-1.5 h-1.5 bg-blue-400 dark:bg-blue-400 rounded-full animate-pulse delay-700" />
         </div>
 
         {/* Content */}
-        <div className="relative z-30 container mx-auto pt-32 pb-16 px-4">
+        <div className="relative z-20 container mx-auto pt-32 pb-16 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:flex-row gap-8 items-start">
               {/* Book Cover */}
