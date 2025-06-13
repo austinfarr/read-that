@@ -18,7 +18,7 @@ body {
     --primary-foreground: 355.7 100% 97.3%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
+    --muted: 210 40% 85%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
@@ -36,24 +36,24 @@ body {
   }
 
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 20%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
+    --background: 222 12% 7%;
+    --foreground: 210 40% 95%;
+    --card: 220 13% 22%;
+    --card-foreground: 210 40% 95%;
+    --popover: 222 15% 11%;
+    --popover-foreground: 210 40% 95%;
     --primary: 142.1 70.6% 45.3%;
     --primary-foreground: 144.9 80.4% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 217 10% 18%;
+    --secondary-foreground: 210 40% 95%;
+    --muted: 215 15% 16%;
+    --muted-foreground: 217 10% 68%;
+    --accent: 216 12% 20%;
+    --accent-foreground: 210 40% 95%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 217 10% 24%;
+    --input: 217 10% 24%;
     --ring: 142.4 71.8% 29.2%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -73,7 +73,7 @@ body {
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 85%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -101,7 +101,7 @@ body {
     --primary-foreground: 210 20% 98%;
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
+    --muted: 220 14.3% 75%;
     --muted-foreground: 220 8.9% 46.1%;
     --accent: 220 14.3% 95.9%;
     --accent-foreground: 220.9 39.3% 11%;
@@ -136,7 +136,7 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Utility for pages with overlay navigation */
   .page-with-overlay-nav {
     @apply pt-20;
