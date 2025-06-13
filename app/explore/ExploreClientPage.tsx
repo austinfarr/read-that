@@ -23,7 +23,7 @@ export default function ExploreClientPage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-background">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden min-h-[50vh]">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-teal-500/20 dark:from-purple-500/10 dark:via-blue-500/10 dark:to-teal-500/10" />
         <div className="absolute inset-0">
           <div className="absolute top-20 left-1/4 w-2 h-2 bg-blue-400 dark:bg-blue-400 rounded-full animate-pulse" />
@@ -32,7 +32,7 @@ export default function ExploreClientPage({
           <div className="absolute top-28 right-1/4 w-1 h-1 bg-yellow-400 dark:bg-yellow-400 rounded-full animate-pulse delay-1000" />
         </div>
 
-        <div className="container mx-auto pt-32 pb-8 px-4 relative">
+        <div className="container mx-auto pt-44 pb-12 px-4 relative">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
               <Sparkles className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
