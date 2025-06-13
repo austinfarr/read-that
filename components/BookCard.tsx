@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import {
   Book,
@@ -14,12 +15,14 @@ interface BookCardProps {
   book: HardcoverBook | HardcoverSearchBook | LocalBook;
   onClick?: (book: Book) => void;
   className?: string;
+  href?: string; // Optional href for Link navigation
 }
 
 export default function BookCard({
   book,
   onClick,
   className = "",
+  href,
 }: BookCardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -45,19 +48,14 @@ export default function BookCard({
     setHasError(true);
   };
 
-  return (
-    <div
-      className={`group relative transition-all duration-500 hover:scale-105 ${
-        onClick ? "cursor-pointer" : "cursor-default"
-      } ${className}`}
-      onClick={handleClick}
-    >
+  const cardContent = (
+    <>
       {/* Gradient border effect */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm" />
 
       <div
         className={`relative overflow-hidden rounded-xl transition-all duration-500 w-[220px] bg-slate-900 border border-slate-700/50 group-hover:border-slate-600 shadow-xl group-hover:shadow-2xl ${
-          onClick ? "cursor-pointer" : "cursor-default"
+          onClick || href ? "cursor-pointer" : "cursor-default"
         }`}
       >
         <div className="relative w-full h-[320px]">
@@ -119,6 +117,31 @@ export default function BookCard({
           </div>
         </div>
       </div>
+    </>
+  );
+
+  // If href is provided, wrap in Link for prefetching
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={`group relative transition-all duration-500 hover:scale-105 block ${className}`}
+        prefetch={true}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  // Otherwise, use div with onClick
+  return (
+    <div
+      className={`group relative transition-all duration-500 hover:scale-105 ${
+        onClick ? "cursor-pointer" : "cursor-default"
+      } ${className}`}
+      onClick={handleClick}
+    >
+      {cardContent}
     </div>
   );
 }

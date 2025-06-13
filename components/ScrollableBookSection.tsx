@@ -8,13 +8,11 @@ import { HardcoverBook, Book } from "@/types/book";
 interface ScrollableBookSectionProps {
   title: string;
   books: HardcoverBook[];
-  onBookClick: (book: Book) => void;
 }
 
 export default function ScrollableBookSection({
   title,
   books,
-  onBookClick,
 }: ScrollableBookSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +70,10 @@ export default function ScrollableBookSection({
         >
           {books.map((book) => (
             <div key={book.id} className="flex-shrink-0">
-              <BookCard book={book} onClick={onBookClick} />
+              <BookCard 
+                book={book} 
+                href={`/books/${book.id}`}
+              />
             </div>
           ))}
         </div>
