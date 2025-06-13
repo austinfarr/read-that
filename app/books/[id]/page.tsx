@@ -94,18 +94,6 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       {/* Hero Section with Book Cover Background */}
       <div className="relative overflow-hidden">
-        {/* Blurred background image */}
-        {book.image?.url && (
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={book.image.url}
-              alt=""
-              fill
-              className="object-cover blur-3xl opacity-20 scale-110"
-              priority
-            />
-          </div>
-        )}
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background z-10" />
