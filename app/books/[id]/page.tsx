@@ -1,33 +1,42 @@
-import { Card, CardContent } from "@/components/ui/card";
-import Image from "next/image";
 import { BookDescription } from "@/components/BookDescription";
+import { Button } from "@/components/ui/button";
+import {
+  Bookmark,
+  BookOpen,
+  Calendar,
+  Heart,
+  Share2,
+  Sparkles,
+  Star,
+} from "lucide-react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
-// Function to fetch book details from Hardcover API
-async function getBookDetails(id: string) {
-  console.log("Fetching book details for ID:", id);
-  const query = `
-    query GetBookById($id: Int!) {
-      books(where: {id: {_eq: $id}}) {
-        title
-        release_date
-        slug
-        subtitle
-        pages
-        description
-        image {
-          url
-        }
-        contributions {
-          author {
-            name
-          }
+// GraphQL query with verified fields
+const GET_BOOK_DETAILS_QUERY = `
+  query GetBookById($id: Int!) {
+    books(where: {id: {_eq: $id}}) {
+      id
+      title
+      subtitle
+      description
+      pages
+      release_date
+      slug
+      image {
+        url
+      }
+      contributions {
+        author {
+          name
         }
       }
     }
-  `;
+  }
+`;
 
-  // Make the GraphQL request to Hardcover
+// Function to fetch book details from Hardcover API
+async function getBookDetails(id: string) {
   const response = await fetch("https://api.hardcover.app/v1/graphql", {
     method: "POST",
     headers: {
@@ -35,7 +44,7 @@ async function getBookDetails(id: string) {
       Authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
     },
     body: JSON.stringify({
-      query,
+      query: GET_BOOK_DETAILS_QUERY,
       variables: { id: parseInt(id) },
     }),
   });
@@ -45,20 +54,16 @@ async function getBookDetails(id: string) {
   }
 
   const data = await response.json();
-  console.log("GraphQL response:", data);
 
-  // Handle errors in the GraphQL response
   if (data.errors) {
     console.error("GraphQL errors:", data.errors);
     throw new Error("Failed to fetch book details from Hardcover");
   }
 
-  // If no books found, return null
   if (!data.data.books || data.data.books.length === 0) {
     return null;
   }
 
-  // Get the first book data
   return data.data.books[0];
 }
 
@@ -66,76 +71,222 @@ export default async function BookPage({ params }: { params: { id: string } }) {
   const { id } = await params;
   const book = await getBookDetails(id);
 
-  // Handle case where book doesn't exist
   if (!book) {
     notFound();
   }
 
   // Extract authors from contributions
   const authors = book.contributions
-    ?.filter((contribution) => contribution.author)
-    .map((contribution) => contribution.author.name) || ["Unknown Author"];
+    ?.filter((contribution: any) => contribution.author)
+    .map((contribution: any) => contribution.author) || [
+    { name: "Unknown Author" },
+  ];
+
+  // Placeholder genres until we can fetch them
+  const genres: string[] = [];
+
+  // Format release date
+  const releaseYear = book.release_date
+    ? new Date(book.release_date).getFullYear()
+    : null;
 
   return (
-    <div className="container mx-auto pt-24 pb-8 px-4">
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Book cover */}
-            <div className="relative w-[200px] h-[300px] shrink-0 mx-auto md:mx-0">
-              {book.image?.url ? (
-                <Image
-                  src={book.image.url}
-                  alt={book.title}
-                  fill
-                  className="object-cover rounded-lg"
-                  priority
-                />
-              ) : (
-                <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-                  No image available
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      {/* Hero Section with Book Cover Background */}
+      <div className="relative overflow-hidden">
+        {/* Blurred background image */}
+        {book.image?.url && (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={book.image.url}
+              alt=""
+              fill
+              className="object-cover blur-3xl opacity-20 scale-110"
+              priority
+            />
+          </div>
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background z-10" />
+
+        {/* Decorative elements */}
+        <div className="absolute inset-0 z-20">
+          <div className="absolute top-20 left-1/4 w-2 h-2 bg-teal-400 dark:bg-teal-400 rounded-full animate-pulse" />
+          <div className="absolute top-32 right-1/3 w-1 h-1 bg-purple-400 dark:bg-purple-400 rounded-full animate-pulse delay-300" />
+          <div className="absolute top-40 left-1/3 w-1.5 h-1.5 bg-blue-400 dark:bg-blue-400 rounded-full animate-pulse delay-700" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-30 container mx-auto pt-32 pb-16 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {/* Book Cover */}
+              <div className="flex-shrink-0">
+                <div className="relative group w-[280px]">
+                  {/* Gradient border effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 rounded-2xl opacity-75 group-hover:opacity-100 transition-all duration-500 blur-sm" />
+
+                  <div className="relative w-[280px] h-[420px] rounded-xl overflow-hidden shadow-2xl">
+                    {book.image?.url ? (
+                      <Image
+                        src={book.image.url}
+                        alt={book.title}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="280px"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center text-slate-400">
+                        <BookOpen className="w-16 h-16 mb-4 opacity-60" />
+                        <p className="text-sm text-center px-4 opacity-60">
+                          No Cover Available
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Book details */}
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
-              {book.subtitle && (
-                <h2 className="text-xl text-muted-foreground mb-2">
-                  {book.subtitle}
-                </h2>
-              )}
-              <p className="text-lg text-muted-foreground mb-4">
-                by {authors.join(", ")}
-              </p>
+                {/* Action Buttons */}
+                <div className="mt-6 flex flex-col gap-2">
+                  <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white text-sm px-4 py-2">
+                    <Heart className="w-4 h-4 mr-2" />
+                    Add to Favorites
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 text-sm px-4 py-2"
+                  >
+                    <Bookmark className="w-4 h-4 mr-2" />
+                    Want to Read
+                  </Button>
+                  <Button variant="outline" className="text-sm px-4 py-2">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+                </div>
+              </div>
 
-              {/* Book metadata */}
-              <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-                {book.release_date && (
-                  <div>
-                    <span className="font-semibold">Published:</span>{" "}
-                    {new Date(book.release_date).toLocaleDateString()}
+              {/* Book Info */}
+              <div className="flex-1 space-y-6">
+                {/* Title and Author */}
+                <div>
+                  <div className="flex items-start gap-3 mb-3">
+                    <Sparkles className="w-8 h-8 text-teal-500 dark:text-teal-400 mt-1 flex-shrink-0" />
+                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent leading-tight">
+                      {book.title}
+                    </h1>
+                  </div>
+                  {book.subtitle && (
+                    <h2 className="text-2xl text-muted-foreground mt-2 ml-11">
+                      {book.subtitle}
+                    </h2>
+                  )}
+                  <div className="flex items-center gap-2 mt-4 ml-11 text-lg">
+                    <span className="text-muted-foreground">by</span>
+                    {authors.map((author: any, index: number) => (
+                      <span key={index}>
+                        <span className="text-teal-600 dark:text-teal-300 font-medium hover:underline cursor-pointer">
+                          {author.name}
+                        </span>
+                        {index < authors.length - 1 && (
+                          <span className="text-muted-foreground">, </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Rating Placeholder */}
+                <div className="flex items-center gap-6 ml-11">
+                  <div className="flex items-center gap-2">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className="w-5 h-5 text-yellow-500 fill-yellow-500"
+                        />
+                      ))}
+                    </div>
+                    <span className="text-lg font-medium">4.5</span>
+                    <span className="text-muted-foreground">
+                      (2,341 ratings)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Book Details Grid */}
+                <div className="grid grid-cols-2 gap-4 ml-11">
+                  {releaseYear && (
+                    <div className="bg-muted/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-sm">Published</span>
+                      </div>
+                      <p className="font-semibold">{releaseYear}</p>
+                    </div>
+                  )}
+                  {book.pages && (
+                    <div className="bg-muted/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="text-sm">Pages</span>
+                      </div>
+                      <p className="font-semibold">{book.pages}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Genres */}
+                {genres.length > 0 && (
+                  <div className="ml-11">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                      Genres
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {genres.map((genre: string) => (
+                        <span
+                          key={genre}
+                          className="px-3 py-1.5 bg-gradient-to-r from-teal-500/10 to-blue-500/10 backdrop-blur-sm rounded-full text-sm font-medium text-teal-700 dark:text-teal-300 border border-teal-500/20"
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
-                {book.pages && (
-                  <div>
-                    <span className="font-semibold">Pages:</span> {book.pages}
+
+                {/* Description */}
+                {book.description && (
+                  <div className="ml-11 mt-6">
+                    <div className="bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl p-6 border border-border/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-1 h-6 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
+                        <h3 className="text-lg font-bold">About this book</h3>
+                      </div>
+                      <BookDescription description={book.description} />
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Description */}
-              {book.description && (
-                <div className="mt-4">
-                  <h2 className="text-xl font-semibold mb-2">Description</h2>
-                  <BookDescription description={book.description} />
-                </div>
-              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Similar Books Section (placeholder) */}
+      <div className="container mx-auto px-4 pb-16 max-w-6xl">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 rounded-full" />
+          <h2 className="text-2xl font-bold">Readers also enjoyed</h2>
+        </div>
+        <div className="bg-gradient-to-r from-muted/30 to-muted/20 backdrop-blur-sm rounded-2xl p-8 border border-border/20 text-center">
+          <p className="text-muted-foreground">
+            Similar book recommendations coming soon...
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
