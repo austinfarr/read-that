@@ -1,7 +1,5 @@
 "use client";
-import { Book } from "@/types/book";
 import { CategorizedBooks } from "@/lib/hardcover-api";
-import { useRouter } from "next/navigation";
 import React from "react";
 import ScrollableBookSection from "@/components/ScrollableBookSection";
 import { Sparkles, BookOpen, Star, TrendingUp } from "lucide-react";
@@ -13,13 +11,6 @@ interface ExploreClientPageProps {
 export default function ExploreClientPage({
   categorizedBooks,
 }: ExploreClientPageProps) {
-  const router = useRouter();
-
-  const handleBookClick = (book: Book) => {
-    // Navigate to the book detail page
-    router.push(`/books/${book.id}`);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-background">
       {/* Hero Section */}
@@ -77,19 +68,16 @@ export default function ExploreClientPage({
         <ScrollableBookSection
           title="Science Fiction & Fantasy"
           books={categorizedBooks.sciFiFantasy}
-          onBookClick={handleBookClick}
         />
 
         <ScrollableBookSection
           title="Classic Literature"
           books={categorizedBooks.classicLiterature}
-          onBookClick={handleBookClick}
         />
 
         <ScrollableBookSection
           title="Modern Fiction"
           books={categorizedBooks.modernFiction}
-          onBookClick={handleBookClick}
         />
 
         {/* Footer CTA */}
