@@ -1,13 +1,13 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import debounce from 'lodash/debounce';
-import { Search, BookOpen, X, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo, useRef } from 'react';
-import { gql, useLazyQuery } from '@apollo/client';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import debounce from "lodash/debounce";
+import { Search, BookOpen, X, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { gql, useLazyQuery } from "@apollo/client";
+import { cn } from "@/lib/utils";
 
 const SEARCH_BOOKS = gql`
   query SearchBooks($query: String!) {
@@ -45,7 +45,7 @@ interface SearchResponse {
 }
 
 export function SearchBar() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookHit[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -57,9 +57,9 @@ export function SearchBar() {
   const [searchBooks, { loading: isLoading }] = useLazyQuery<SearchResponse>(
     SEARCH_BOOKS,
     {
-      fetchPolicy: 'network-only',
+      fetchPolicy: "network-only",
       onCompleted: (data) => {
-        console.log('Search completed:', data);
+        console.log("Search completed:", data);
         if (data && data.search && data.search.results) {
           setResults(data.search.results.hits);
         }
@@ -69,13 +69,14 @@ export function SearchBar() {
 
   // Memoize the debounced search function
   const debouncedSearch = useMemo(
-    () => debounce((searchQuery: string) => {
-      if (!searchQuery.trim()) {
-        setResults([]);
-        return;
-      }
-      searchBooks({ variables: { query: searchQuery } });
-    }, 300),
+    () =>
+      debounce((searchQuery: string) => {
+        if (!searchQuery.trim()) {
+          setResults([]);
+          return;
+        }
+        searchBooks({ variables: { query: searchQuery } });
+      }, 300),
     [searchBooks]
   );
 
@@ -96,11 +97,11 @@ export function SearchBar() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Focus search input when mobile search opens
@@ -113,13 +114,13 @@ export function SearchBar() {
   // Close search on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSearchOpen) {
+      if (e.key === "Escape" && isSearchOpen) {
         closeSearch();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isSearchOpen]);
 
   const handleBookSelect = (bookId: string) => {
@@ -129,7 +130,7 @@ export function SearchBar() {
 
   const closeSearch = () => {
     setIsSearchOpen(false);
-    setQuery('');
+    setQuery("");
     setResults([]);
     setShowResults(false);
   };
@@ -175,7 +176,7 @@ export function SearchBar() {
               </p>
               {book.document.author_names && (
                 <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
-                  {book.document.author_names.join(', ')}
+                  {book.document.author_names.join(", ")}
                 </p>
               )}
             </div>
@@ -198,10 +199,10 @@ export function SearchBar() {
           variant="ghost"
           size="icon"
           onClick={() => setIsSearchOpen(true)}
-          className="h-9 w-9"
+          className="h-10 w-10"
           aria-label="Search books"
         >
-          <Search className="h-5 w-5" />
+          <Search className="h-6 w-6 scale-110" />
         </Button>
 
         {/* Search Overlay */}
@@ -254,7 +255,7 @@ export function SearchBar() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => setQuery('')}
+                      onClick={() => setQuery("")}
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
                       aria-label="Clear search"
                     >
@@ -270,10 +271,7 @@ export function SearchBar() {
 
                 {/* Search Button */}
                 {query && results.length > 0 && (
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base"
-                  >
+                  <Button type="submit" className="w-full h-12 text-base">
                     Open "{results[0].document.title}"
                   </Button>
                 )}

@@ -61,32 +61,31 @@ const Navbar = ({}) => {
             </Link>
         </nav>
 
-        <SearchBar />
+        {/* Desktop: Search in center, buttons on right */}
+        <div className="hidden md:block">
+          <SearchBar />
+        </div>
 
-        <div className="flex items-center">
-          <Button variant="secondary" className="hidden md:block px-2">
+        <div className="flex items-center gap-2">
+          {/* Desktop buttons */}
+          <Button variant="secondary" className="hidden md:block">
             Login
           </Button>
-          <Button className="hidden md:block ml-2 mr-2">Get Started</Button>
-          <div className="mr-2">
+          <Button className="hidden md:block">Get Started</Button>
+          
+          {/* Desktop theme toggle */}
+          <div className="hidden md:block">
             <ThemeToggle />
           </div>
 
-          <div className="flex md:hidden items-center gap-1">
-            <DropdownMenu>
-              {/* <DropdownMenuContent align="start">
-              {landings.map((page) => (
-                <DropdownMenuItem key={page.id}>
-                  <Link href={page.route}>{page.title}</Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent> */}
-            </DropdownMenu>
-
+          {/* Mobile: Search and Menu on the right */}
+          <div className="flex md:hidden items-center gap-2">
+            <SearchBar />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5 rotate-0 scale-100" />
+                <Button variant="outline" size="icon" className="h-10 w-10">
+                  <Menu className="h-6 w-6 scale-110" />
                 </Button>
               </DropdownMenuTrigger>
 
@@ -102,6 +101,14 @@ const Navbar = ({}) => {
                     <BookOpen className="w-4 h-4" />
                     <span>My Books</span>
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <div className="flex items-center gap-2 w-full">
+                    <span className="text-sm">Theme</span>
+                    <div className="ml-auto">
+                      <ThemeToggle />
+                    </div>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Button variant="secondary" className="w-full text-sm">
