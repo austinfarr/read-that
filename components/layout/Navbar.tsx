@@ -1,20 +1,20 @@
-'use client';
+"use client";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Menu } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { Menu, Compass, BookOpen } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { Button } from "@/components/ui/button";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
-import Link from 'next/link';
+import Link from "next/link";
 // import { randomUUID } from "crypto";
-import { usePathname } from 'next/navigation';
-import SearchBar from '../SearchBar';
+import { usePathname } from "next/navigation";
+import SearchBar from "../SearchBar";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
@@ -23,24 +23,44 @@ const Navbar = ({}) => {
     <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
       <Card className="bg-background/80 backdrop-blur-md py-3 px-8 border border-border/20 flex items-center justify-between gap-6 rounded-2xl shadow-lg">
         {/* Logo here */}
-        <ul className="hidden md:flex items-center gap-10 text-card-foreground">
-          <p className="text-2xl font-bold text-primary">ReadThat</p>
+        <div className="hidden md:flex items-center gap-12">
+          <Link href="/" className="text-2xl font-bold text-primary">
+            ReadThat
+          </Link>
 
-          <li
-            className={`font-medium ${
-              pathname === '/explore' ? 'text-primary' : 'text-foreground'
-            }`}
-          >
-            <a href="/explore">Explore</a>
-          </li>
-          <li
-            className={`font-medium ${
-              pathname === '/' ? 'text-primary' : 'text-foreground'
-            }`}
-          >
-            <Link href="/">My Books</Link>
-          </li>
-        </ul>
+          <nav className="flex items-center gap-2">
+            <Link
+              href="/explore"
+              className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+                pathname === "/explore"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Compass
+                className={`w-4 h-4 transition-transform group-hover:rotate-12 ${
+                  pathname === "/explore" ? "text-primary" : ""
+                }`}
+              />
+              <span className="font-medium">Explore</span>
+            </Link>
+            <Link
+              href="/my-books"
+              className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+                pathname === "/my-books"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BookOpen
+                className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                  pathname === "/my-books" ? "text-primary" : ""
+                }`}
+              />
+              <span className="font-medium">My Books</span>
+            </Link>
+          </nav>
+        </div>
 
         <SearchBar />
 
@@ -72,18 +92,18 @@ const Navbar = ({}) => {
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <a href="#home">Home</a>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/explore" className="flex items-center gap-2">
+                    <Compass className="w-4 h-4" />
+                    <span>Explore</span>
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#features">Features</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#pricing">Pricing</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#faqs">FAQs</a>
+                <DropdownMenuItem asChild>
+                  <Link href="/my-books" className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    <span>My Books</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Button variant="secondary" className="w-full text-sm">
