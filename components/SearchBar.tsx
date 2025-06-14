@@ -1,19 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle,
-  SheetTrigger 
-} from '@/components/ui/sheet';
 import debounce from 'lodash/debounce';
-import { Search, BookOpen } from 'lucide-react';
+import { Search, BookOpen, X, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
+import { cn } from '@/lib/utils';
 
 const SEARCH_BOOKS = gql`
   query SearchBooks($query: String!) {
@@ -55,7 +49,8 @@ export function SearchBar() {
   const [results, setResults] = useState<BookHit[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
 
@@ -108,12 +103,43 @@ export function SearchBar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Focus search input when mobile search opens
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
+
+  // Close search on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSearchOpen) {
+        closeSearch();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isSearchOpen]);
+
   const handleBookSelect = (bookId: string) => {
     router.push(`/books/${bookId}`);
+    closeSearch();
+  };
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
     setQuery('');
     setResults([]);
     setShowResults(false);
-    setIsSheetOpen(false);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim() && results.length > 0) {
+      // Navigate to first result
+      handleBookSelect(results[0].document.id);
+    }
   };
 
   const SearchResults = () => (
@@ -164,39 +190,98 @@ export function SearchBar() {
   );
 
   if (isMobile) {
-    // Mobile: Sheet-based search
+    // Mobile: Enhanced overlay search
     return (
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="p-2">
-            <Search className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="top" className="h-auto max-h-[90vh] overflow-hidden">
-          <SheetHeader className="space-y-4">
-            <SheetTitle>Search Books</SheetTitle>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search books..."
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setShowResults(true);
-                }}
-                onFocus={() => setShowResults(true)}
-                className="w-full pr-10"
-                autoFocus
-              />
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      <>
+        {/* Search Trigger Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsSearchOpen(true)}
+          className="h-9 w-9"
+          aria-label="Search books"
+        >
+          <Search className="h-5 w-5" />
+        </Button>
+
+        {/* Search Overlay */}
+        <div
+          className={cn(
+            "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-300",
+            isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          )}
+          onClick={closeSearch}
+        >
+          <div
+            className={cn(
+              "absolute top-0 left-0 right-0 bg-background border-b shadow-lg transition-transform duration-300 ease-out",
+              isSearchOpen ? "translate-y-0" : "-translate-y-full"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="container px-4 py-4">
+              {/* Search Header */}
+              <div className="flex items-center space-x-3 mb-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeSearch}
+                  className="h-9 w-9 shrink-0"
+                  aria-label="Close search"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <h2 className="text-lg font-semibold">Search Books</h2>
+              </div>
+
+              {/* Search Form */}
+              <form onSubmit={handleSearchSubmit} className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="What book are you looking for?"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setShowResults(true);
+                    }}
+                    className="pl-10 pr-10 h-12 text-base"
+                  />
+                  {query && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setQuery('')}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                {/* Search Results */}
+                <div className="max-h-[60vh] overflow-y-auto">
+                  <SearchResults />
+                </div>
+
+                {/* Search Button */}
+                {query && results.length > 0 && (
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base"
+                  >
+                    Open "{results[0].document.title}"
+                  </Button>
+                )}
+              </form>
             </div>
-          </SheetHeader>
-          
-          <div className="mt-6 max-h-[60vh] overflow-y-auto">
-            <SearchResults />
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      </>
     );
   }
 
