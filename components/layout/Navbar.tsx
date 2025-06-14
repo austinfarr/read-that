@@ -20,15 +20,15 @@ const Navbar = ({}) => {
   const pathname = usePathname();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
-      <Card className="bg-background/80 backdrop-blur-md py-3 px-8 border border-border/20 flex items-center justify-between gap-6 rounded-2xl shadow-lg">
-        {/* Logo here */}
-        <div className="hidden md:flex items-center gap-12">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            ReadThat
-          </Link>
+    <div className="fixed top-0 left-0 right-0 z-50 px-3 md:px-4 pt-3 md:pt-4">
+      <Card className="bg-background/80 backdrop-blur-md py-2 md:py-3 px-4 md:px-8 border border-border/20 flex items-center justify-between gap-2 md:gap-6 rounded-2xl shadow-lg">
+        {/* Logo - visible on all screens */}
+        <Link href="/" className="text-xl md:text-2xl font-bold text-primary flex-shrink-0">
+          ReadThat
+        </Link>
 
-          <nav className="flex items-center gap-2">
+        {/* Desktop navigation */}
+        <nav className="hidden md:flex items-center gap-2">
             <Link
               href="/explore"
               className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
@@ -59,8 +59,7 @@ const Navbar = ({}) => {
               />
               <span className="font-medium">My Books</span>
             </Link>
-          </nav>
-        </div>
+        </nav>
 
         <SearchBar />
 
@@ -69,13 +68,12 @@ const Navbar = ({}) => {
             Login
           </Button>
           <Button className="hidden md:block ml-2 mr-2">Get Started</Button>
+          <div className="mr-2">
+            <ThemeToggle />
+          </div>
 
-          <div className="flex md:hidden mr-2 items-center gap-2">
+          <div className="flex md:hidden items-center gap-1">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <span className="py-2 px-2 bg-gray-100 rounded-md">Pages</span>
-              </DropdownMenuTrigger>
-
               {/* <DropdownMenuContent align="start">
               {landings.map((page) => (
                 <DropdownMenuItem key={page.id}>
@@ -116,8 +114,6 @@ const Navbar = ({}) => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          <ThemeToggle />
         </div>
       </Card>
     </div>
