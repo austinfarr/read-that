@@ -48,7 +48,6 @@ export function SearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookHit[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,18 +90,6 @@ export function SearchBar() {
       debouncedSearch.cancel();
     };
   }, [query, debouncedSearch]);
-
-  // Check if device is mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Focus search input when mobile search opens
   useEffect(() => {
@@ -190,126 +177,121 @@ export function SearchBar() {
     </div>
   );
 
-  if (isMobile) {
-    // Mobile: Enhanced overlay search
-    return (
-      <>
-        {/* Search Trigger Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsSearchOpen(true)}
-          className="h-10 w-10"
-          aria-label="Search books"
-        >
-          <Search className="h-6 w-6 scale-110" />
-        </Button>
-
-        {/* Search Overlay */}
-        <div
-          className={cn(
-            "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-300",
-            isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          )}
-          onClick={closeSearch}
-        >
-          <div
-            className={cn(
-              "absolute top-0 left-0 right-0 bg-background border-b shadow-lg transition-transform duration-300 ease-out",
-              isSearchOpen ? "translate-y-0" : "-translate-y-full"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="container px-4 py-4">
-              {/* Search Header */}
-              <div className="flex items-center space-x-3 mb-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={closeSearch}
-                  className="h-9 w-9 shrink-0"
-                  aria-label="Close search"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <h2 className="text-lg font-semibold">Search Books</h2>
-              </div>
-
-              {/* Search Form */}
-              <form onSubmit={handleSearchSubmit} className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="What book are you looking for?"
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setShowResults(true);
-                    }}
-                    className="pl-10 pr-10 h-12 text-base"
-                  />
-                  {query && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setQuery("")}
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
-                      aria-label="Clear search"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-
-                {/* Search Results */}
-                <div className="max-h-[60vh] overflow-y-auto">
-                  <SearchResults />
-                </div>
-
-                {/* Search Button */}
-                {query && results.length > 0 && (
-                  <Button type="submit" className="w-full h-12 text-base">
-                    Open "{results[0].document.title}"
-                  </Button>
-                )}
-              </form>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // Desktop: Traditional dropdown search
   return (
-    <div className="relative w-full max-w-sm lg:max-w-md">
-      <div className="relative">
-        <Input
-          type="text"
-          placeholder="Search books..."
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setShowResults(true);
-          }}
-          onFocus={() => setShowResults(true)}
-          className="w-full pr-10"
-        />
-        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+    <>
+      {/* Mobile: Search Trigger Button (visible only on mobile) */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsSearchOpen(true)}
+        className="h-10 w-10 md:hidden"
+        aria-label="Search books"
+      >
+        <Search className="h-6 w-6 scale-110" />
+      </Button>
+
+      {/* Desktop: Traditional search input (visible only on desktop) */}
+      <div className="relative w-full max-w-sm lg:max-w-md hidden md:block">
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Search books..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowResults(true);
+            }}
+            onFocus={() => setShowResults(true)}
+            className="w-full pr-10"
+          />
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        </div>
+
+        {/* Desktop Results dropdown */}
+        {showResults && (results.length > 0 || isLoading || query) && (
+          <Card className="absolute mt-2 w-full z-50 max-h-[400px] overflow-y-auto">
+            <CardContent className="p-2">
+              <SearchResults />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* Desktop Results dropdown */}
-      {showResults && (results.length > 0 || isLoading || query) && (
-        <Card className="absolute mt-2 w-full z-50 max-h-[400px] overflow-y-auto">
-          <CardContent className="p-2">
-            <SearchResults />
-          </CardContent>
-        </Card>
-      )}
-    </div>
+      {/* Mobile Search Overlay (always rendered but conditionally visible) */}
+      <div
+        className={cn(
+          "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-300 md:hidden",
+          isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        )}
+        onClick={closeSearch}
+      >
+        <div
+          className={cn(
+            "absolute top-0 left-0 right-0 bg-background border-b shadow-lg transition-transform duration-300 ease-out",
+            isSearchOpen ? "translate-y-0" : "-translate-y-full"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="container px-4 py-4">
+            {/* Search Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeSearch}
+                className="h-9 w-9 shrink-0"
+                aria-label="Close search"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h2 className="text-lg font-semibold">Search Books</h2>
+            </div>
+
+            {/* Search Form */}
+            <form onSubmit={handleSearchSubmit} className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="What book are you looking for?"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setShowResults(true);
+                  }}
+                  className="pl-10 pr-10 h-12 text-base"
+                />
+                {query && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setQuery("")}
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+
+              {/* Search Results */}
+              <div className="max-h-[60vh] overflow-y-auto">
+                <SearchResults />
+              </div>
+
+              {/* Search Button */}
+              {query && results.length > 0 && (
+                <Button type="submit" className="w-full h-12 text-base">
+                  Open "{results[0].document.title}"
+                </Button>
+              )}
+            </form>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
