@@ -2,12 +2,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import debounce from "lodash/debounce";
-import { Search, BookOpen, X, ArrowLeft } from "lucide-react";
-import Image from "next/image";
+import { Search, X, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { gql, useLazyQuery } from "@apollo/client";
 import { cn } from "@/lib/utils";
+import { SearchResults, BookHit } from "@/components/SearchResults";
 
 const SEARCH_BOOKS = gql`
   query SearchBooks($query: String!) {
@@ -17,30 +17,15 @@ const SEARCH_BOOKS = gql`
   }
 `;
 
-// Represents the structure of a book document from Hardcover's API
-interface BookDocument {
-  id: string;
-  title: string;
-  author_names?: string[];
-  image?: {
-    url: string;
-  };
-}
-
-// Each search result is a hit with a document property
-interface BookHit {
-  document: BookDocument;
-}
-
 // The results property contains an array of hits
-interface SearchResults {
+interface SearchResultsData {
   hits: BookHit[];
 }
 
 // Complete response structure from the GraphQL query
 interface SearchResponse {
   search: {
-    results: SearchResults;
+    results: SearchResultsData;
   };
 }
 
@@ -130,52 +115,6 @@ export function SearchBar() {
     }
   };
 
-  const SearchResults = () => (
-    <div className="space-y-2">
-      {isLoading ? (
-        <div className="p-4 text-center text-sm text-muted-foreground">
-          Loading...
-        </div>
-      ) : results.length > 0 ? (
-        results.map((book) => (
-          <div
-            key={book.document.id}
-            className="flex items-center gap-3 p-3 hover:bg-accent rounded-lg cursor-pointer transition-colors"
-            onClick={() => handleBookSelect(book.document.id)}
-          >
-            {book.document.image?.url ? (
-              <Image
-                src={book.document.image.url}
-                alt={book.document.title}
-                width={50}
-                height={75}
-                className="object-cover rounded flex-shrink-0"
-              />
-            ) : (
-              <div className="h-[75px] w-[50px] bg-muted rounded flex-shrink-0 flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-muted-foreground" />
-              </div>
-            )}
-
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm line-clamp-2">
-                {book.document.title}
-              </p>
-              {book.document.author_names && (
-                <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
-                  {book.document.author_names.join(", ")}
-                </p>
-              )}
-            </div>
-          </div>
-        ))
-      ) : query && !isLoading ? (
-        <div className="p-4 text-center text-sm text-muted-foreground">
-          No books found for "{query}"
-        </div>
-      ) : null}
-    </div>
-  );
 
   return (
     <>
@@ -211,7 +150,12 @@ export function SearchBar() {
         {showResults && (results.length > 0 || isLoading || query) && (
           <Card className="absolute mt-2 w-full z-50 max-h-[400px] overflow-y-auto">
             <CardContent className="p-2">
-              <SearchResults />
+              <SearchResults
+                results={results}
+                query={query}
+                isLoading={isLoading}
+                onBookSelect={handleBookSelect}
+              />
             </CardContent>
           </Card>
         )}
@@ -278,7 +222,12 @@ export function SearchBar() {
 
               {/* Search Results */}
               <div className="max-h-[60vh] overflow-y-auto">
-                <SearchResults />
+                <SearchResults
+                  results={results}
+                  query={query}
+                  isLoading={isLoading}
+                  onBookSelect={handleBookSelect}
+                />
               </div>
 
               {/* Search Button */}
