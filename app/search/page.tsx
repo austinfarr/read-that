@@ -30,6 +30,7 @@ interface SearchResponse {
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookHit[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -38,6 +39,7 @@ export default function SearchPage() {
     {
       fetchPolicy: "network-only",
       onCompleted: (data) => {
+        setHasSearched(true);
         if (data && data.search && data.search.results) {
           setResults(data.search.results.hits);
         }
@@ -50,6 +52,7 @@ export default function SearchPage() {
       debounce((searchQuery: string) => {
         if (!searchQuery.trim()) {
           setResults([]);
+          setHasSearched(false);
           return;
         }
         searchBooks({ variables: { query: searchQuery } });
@@ -62,6 +65,7 @@ export default function SearchPage() {
       debouncedSearch(query);
     } else {
       setResults([]);
+      setHasSearched(false);
     }
 
     return () => {
@@ -90,6 +94,7 @@ export default function SearchPage() {
   const clearSearch = () => {
     setQuery("");
     setResults([]);
+    setHasSearched(false);
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
@@ -186,6 +191,7 @@ export default function SearchPage() {
                 results={results}
                 query={query}
                 isLoading={isLoading}
+                hasSearched={hasSearched}
                 onBookSelect={handleBookSelect}
               />
             </div>

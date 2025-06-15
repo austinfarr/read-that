@@ -20,10 +20,11 @@ interface SearchResultsProps {
   results: BookHit[];
   query: string;
   isLoading: boolean;
+  hasSearched: boolean;
   onBookSelect: (bookId: string) => void;
 }
 
-export function SearchResults({ results, query, isLoading, onBookSelect }: SearchResultsProps) {
+export function SearchResults({ results, query, isLoading, hasSearched, onBookSelect }: SearchResultsProps) {
   if (isLoading) {
     return (
       <div className="p-4 text-center text-sm text-muted-foreground">
@@ -71,7 +72,7 @@ export function SearchResults({ results, query, isLoading, onBookSelect }: Searc
     );
   }
 
-  if (query && !isLoading) {
+  if (hasSearched && !isLoading && results.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-muted-foreground">
         No books found for "{query}"
