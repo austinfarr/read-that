@@ -20,45 +20,48 @@ const Navbar = ({}) => {
   const pathname = usePathname();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 px-3 md:px-4 pt-3 md:pt-4">
-      <Card className="bg-background/80 backdrop-blur-md py-2 md:py-3 px-4 md:px-8 border border-border/20 flex items-center justify-between gap-2 md:gap-6 rounded-2xl shadow-lg">
+    <div className="fixed top-0 left-0 right-0 z-50 px-2 md:px-4 pt-2 md:pt-4">
+      <Card className="bg-background/80 backdrop-blur-md py-2 md:py-3 px-3 md:px-8 border border-border/20 flex items-center justify-between gap-2 md:gap-6 rounded-2xl shadow-lg">
         {/* Logo - visible on all screens */}
-        <Link href="/" className="text-xl md:text-2xl font-bold text-primary flex-shrink-0">
+        <Link
+          href="/"
+          className="text-xl md:text-2xl font-bold text-primary flex-shrink-0"
+        >
           ReadThat
         </Link>
 
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-2">
-            <Link
-              href="/explore"
-              className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                pathname === "/explore"
-                  ? "bg-primary/10 text-primary"
-                  : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+          <Link
+            href="/explore"
+            className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+              pathname === "/explore"
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Compass
+              className={`w-4 h-4 transition-transform group-hover:rotate-12 ${
+                pathname === "/explore" ? "text-primary" : ""
               }`}
-            >
-              <Compass
-                className={`w-4 h-4 transition-transform group-hover:rotate-12 ${
-                  pathname === "/explore" ? "text-primary" : ""
-                }`}
-              />
-              <span className="font-medium">Explore</span>
-            </Link>
-            <Link
-              href="/my-books"
-              className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                pathname === "/my-books"
-                  ? "bg-primary/10 text-primary"
-                  : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+            />
+            <span className="font-medium">Explore</span>
+          </Link>
+          <Link
+            href="/my-books"
+            className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+              pathname === "/my-books"
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <BookOpen
+              className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                pathname === "/my-books" ? "text-primary" : ""
               }`}
-            >
-              <BookOpen
-                className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                  pathname === "/my-books" ? "text-primary" : ""
-                }`}
-              />
-              <span className="font-medium">My Books</span>
-            </Link>
+            />
+            <span className="font-medium">My Books</span>
+          </Link>
         </nav>
 
         {/* Desktop: Search in center, buttons on right */}
@@ -72,7 +75,7 @@ const Navbar = ({}) => {
             Login
           </Button>
           <Button className="hidden md:block">Get Started</Button>
-          
+
           {/* Desktop theme toggle */}
           <div className="hidden md:block">
             <ThemeToggle />
@@ -81,7 +84,7 @@ const Navbar = ({}) => {
           {/* Mobile: Search and Menu on the right */}
           <div className="flex md:hidden items-center gap-2">
             <SearchBar />
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
@@ -126,53 +129,5 @@ const Navbar = ({}) => {
     </div>
   );
 };
-
-// const landings = [
-//   {
-//     id: randomUUID(),
-//     title: "Landing 01",
-//     route: "/project-management",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 02",
-//     route: "/crm-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 03",
-//     route: "/ai-content-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 04",
-//     route: "/new-intro-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 05",
-//     route: "/about-us-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 06",
-//     route: "/contact-us-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 07",
-//     route: "/faqs-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 08",
-//     route: "/pricing-landing",
-//   },
-//   {
-//     id: randomUUID(),
-//     title: "Landing 09",
-//     route: "/career-landing",
-//   },
-// ];
 
 export default Navbar;
