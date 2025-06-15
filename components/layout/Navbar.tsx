@@ -19,6 +19,11 @@ import SearchBar from "../SearchBar";
 const Navbar = ({}) => {
   const pathname = usePathname();
 
+  // Hide navbar on search page for fullscreen experience
+  if (pathname === '/search') {
+    return null;
+  }
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 px-2 md:px-4 pt-2 md:pt-4">
       <Card className="bg-background/80 backdrop-blur-md py-2 md:py-3 px-3 md:px-8 border border-border/20 flex items-center justify-between gap-2 md:gap-6 rounded-2xl shadow-lg">
