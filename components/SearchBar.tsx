@@ -32,6 +32,7 @@ export function SearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookHit[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const router = useRouter();
 
@@ -41,6 +42,7 @@ export function SearchBar() {
       fetchPolicy: "network-only",
       onCompleted: (data) => {
         console.log("Search completed:", data);
+        setHasSearched(true);
         if (data && data.search && data.search.results) {
           setResults(data.search.results.hits);
         }
@@ -54,6 +56,7 @@ export function SearchBar() {
       debounce((searchQuery: string) => {
         if (!searchQuery.trim()) {
           setResults([]);
+          setHasSearched(false);
           return;
         }
         searchBooks({ variables: { query: searchQuery } });
@@ -66,6 +69,7 @@ export function SearchBar() {
       debouncedSearch(query);
     } else {
       setResults([]);
+      setHasSearched(false);
     }
 
     return () => {
@@ -118,6 +122,7 @@ export function SearchBar() {
                 results={results}
                 query={query}
                 isLoading={isLoading}
+                hasSearched={hasSearched}
                 onBookSelect={handleBookSelect}
               />
             </CardContent>
