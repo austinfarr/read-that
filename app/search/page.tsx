@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import debounce from "lodash/debounce";
-import { Search, X, ArrowLeft } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { gql, useLazyQuery } from "@apollo/client";
@@ -97,19 +97,19 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl mx-auto px-4 py-6">
+      <div className="px-4 py-6">
         {/* Header */}
-        <div className="flex items-center space-x-3 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold tracking-tight">Search Books</h1>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.back()}
-            className="h-9 w-9 shrink-0"
-            aria-label="Go back"
+            onClick={() => router.push('/')}
+            className="h-10 w-10 shrink-0 hover:bg-muted/80"
+            aria-label="Close search"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Search Books</h1>
         </div>
 
         {/* Search Form */}
