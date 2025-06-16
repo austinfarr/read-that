@@ -20,7 +20,7 @@ const Navbar = ({}) => {
   const pathname = usePathname();
 
   // Hide navbar on search page for fullscreen experience
-  if (pathname === '/search') {
+  if (pathname === "/search") {
     return null;
   }
 
@@ -70,7 +70,7 @@ const Navbar = ({}) => {
         </nav>
 
         {/* Desktop: Search in center, buttons on right */}
-        <div className="hidden md:block">
+        <div className="hidden md:block flex-1 max-w-sm mx-4">
           <SearchBar />
         </div>
 

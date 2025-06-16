@@ -77,12 +77,10 @@ export function SearchBar() {
     };
   }, [query, debouncedSearch]);
 
-
   const handleBookSelect = (bookId: string) => {
     router.push(`/books/${bookId}`);
     setShowResults(false);
   };
-
 
   return (
     <>
@@ -90,7 +88,7 @@ export function SearchBar() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => router.push('/search')}
+        onClick={() => router.push("/search")}
         className="h-10 w-10 md:hidden"
         aria-label="Search books"
       >
@@ -98,7 +96,7 @@ export function SearchBar() {
       </Button>
 
       {/* Desktop: Traditional search input (visible only on desktop) */}
-      <div className="relative w-full max-w-sm lg:max-w-md hidden md:block">
+      <div className="relative w-full hidden md:block">
         <div className="relative">
           <Input
             type="text"
@@ -129,7 +127,6 @@ export function SearchBar() {
           </Card>
         )}
       </div>
-
     </>
   );
 }

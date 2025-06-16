@@ -24,7 +24,13 @@ interface SearchResultsProps {
   onBookSelect: (bookId: string) => void;
 }
 
-export function SearchResults({ results, query, isLoading, hasSearched, onBookSelect }: SearchResultsProps) {
+export function SearchResults({
+  results,
+  query,
+  isLoading,
+  hasSearched,
+  onBookSelect,
+}: SearchResultsProps) {
   if (isLoading) {
     return (
       <div className="p-4 text-center text-sm text-muted-foreground">
@@ -35,11 +41,11 @@ export function SearchResults({ results, query, isLoading, hasSearched, onBookSe
 
   if (results.length > 0) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-1">
         {results.map((book) => (
           <div
             key={book.document.id}
-            className="flex items-center gap-3 p-3 hover:bg-accent rounded-lg cursor-pointer transition-colors"
+            className="flex items-center gap-3 p-1 hover:bg-accent rounded-lg cursor-pointer transition-colors"
             onClick={() => onBookSelect(book.document.id)}
           >
             {book.document.image?.url ? (
