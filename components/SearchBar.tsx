@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import debounce from "lodash/debounce";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -70,6 +70,7 @@ export function SearchBar() {
     } else {
       setResults([]);
       setHasSearched(false);
+      setShowResults(false);
     }
 
     return () => {
@@ -77,12 +78,10 @@ export function SearchBar() {
     };
   }, [query, debouncedSearch]);
 
-
   const handleBookSelect = (bookId: string) => {
     router.push(`/books/${bookId}`);
     setShowResults(false);
   };
-
 
   return (
     <>
@@ -90,7 +89,7 @@ export function SearchBar() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => router.push('/search')}
+        onClick={() => router.push("/search")}
         className="h-10 w-10 md:hidden"
         aria-label="Search books"
       >
@@ -98,38 +97,47 @@ export function SearchBar() {
       </Button>
 
       {/* Desktop: Traditional search input (visible only on desktop) */}
-      <div className="relative w-full max-w-sm lg:max-w-md hidden md:block">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search books..."
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setShowResults(true);
-            }}
-            onFocus={() => setShowResults(true)}
-            className="w-full pr-10"
-          />
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        </div>
-
-        {/* Desktop Results dropdown */}
-        {showResults && (results.length > 0 || isLoading || query) && (
-          <Card className="absolute mt-2 w-full z-50 max-h-[400px] overflow-y-auto">
-            <CardContent className="p-2">
-              <SearchResults
-                results={results}
-                query={query}
-                isLoading={isLoading}
-                hasSearched={hasSearched}
-                onBookSelect={handleBookSelect}
-              />
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
+      <Popover open={showResults} onOpenChange={setShowResults}>
+        <PopoverAnchor asChild>
+          <div className="relative w-full hidden md:block">
+            <Input
+              type="text"
+              placeholder="Search books..."
+              value={query}
+              onChange={(e) => {
+                const newQuery = e.target.value;
+                setQuery(newQuery);
+                if (newQuery.trim()) {
+                  setShowResults(true);
+                }
+              }}
+              onFocus={() => {
+                if (query || results.length > 0) {
+                  setShowResults(true);
+                }
+              }}
+              className="w-full pr-10"
+            />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          </div>
+        </PopoverAnchor>
+        <PopoverContent 
+          className="w-[var(--radix-popover-trigger-width)] max-h-[400px] overflow-y-auto p-2" 
+          align="start"
+          sideOffset={8}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          {(results.length > 0 || isLoading || (query && hasSearched)) && (
+            <SearchResults
+              results={results}
+              query={query}
+              isLoading={isLoading}
+              hasSearched={hasSearched}
+              onBookSelect={handleBookSelect}
+            />
+          )}
+        </PopoverContent>
+      </Popover>
     </>
   );
 }
