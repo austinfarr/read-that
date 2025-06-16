@@ -18,35 +18,37 @@ export default function ScrollableBookSection({
 
   const scrollLeft = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -220, behavior: "smooth" });
+      const scrollAmount = window.innerWidth < 640 ? -130 : window.innerWidth < 768 ? -160 : -190;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 220, behavior: "smooth" });
+      const scrollAmount = window.innerWidth < 640 ? 130 : window.innerWidth < 768 ? 160 : 190;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
 
   if (books.length === 0) return null;
 
   return (
-    <div className="mb-16 relative">
+    <div className="mb-8 sm:mb-12 md:mb-16 relative">
       {/* Section Header */}
-      <div className="mb-8 relative">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-1 h-8 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
-          <h2 className="text-3xl font-bold text-foreground">{title}</h2>
-          <Sparkles className="w-6 h-6 text-teal-500 dark:text-teal-400 animate-pulse" />
+      <div className="mb-4 sm:mb-6 md:mb-8 relative">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+          <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{title}</h2>
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-500 dark:text-teal-400 animate-pulse" />
         </div>
-        <div className="w-24 h-1 bg-gradient-to-r from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full ml-7" />
+        <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full ml-4 sm:ml-6 md:ml-7" />
       </div>
-      <div className="relative scroll-section-container group/scroll bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 rounded-2xl p-6 border border-border/20 backdrop-blur-sm">
+      <div className="relative scroll-section-container group/scroll bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-border/20 backdrop-blur-sm">
         {/* Left Arrow */}
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg hidden sm:flex"
           onClick={scrollLeft}
         >
           <ChevronLeft className="h-5 w-5" />
@@ -56,7 +58,7 @@ export default function ScrollableBookSection({
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg"
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border-teal-500/30 dark:border-teal-400/30 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 text-teal-500 dark:text-teal-400 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 shadow-lg hidden sm:flex"
           onClick={scrollRight}
         >
           <ChevronRight className="h-5 w-5" />
@@ -65,7 +67,7 @@ export default function ScrollableBookSection({
         {/* Scrollable container */}
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide px-8 py-4"
+          className="flex gap-3 sm:gap-4 md:gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide px-2 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {books.map((book) => (
