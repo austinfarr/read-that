@@ -136,8 +136,8 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="mt-4 sm:mt-6 w-full max-w-xs lg:max-w-none">
+                {/* Action Buttons - Desktop only (hidden on mobile) */}
+                <div className="mt-4 sm:mt-6 w-full max-w-xs lg:max-w-none hidden sm:block">
                   <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
                     <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white text-sm px-4 py-2">
                       <Heart className="w-4 h-4 mr-2" />
@@ -205,6 +205,27 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     <span className="text-sm sm:text-base text-muted-foreground">
                       (2,341 ratings)
                     </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons - Mobile only (hidden on desktop) */}
+                <div className="block sm:hidden w-full px-2">
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white text-sm px-4 py-2 w-full">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Add to Favorites
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 text-sm px-4 py-2 w-full"
+                    >
+                      <Bookmark className="w-4 h-4 mr-2" />
+                      Want to Read
+                    </Button>
+                    <Button variant="outline" className="text-sm px-4 py-2 w-full">
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </Button>
                   </div>
                 </div>
 
