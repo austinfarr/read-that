@@ -77,7 +77,7 @@ export function BookDescription({ description }: BookDescriptionProps) {
         <div className="mt-3 flex justify-center lg:justify-start">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-medium transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-2"
             aria-expanded={isExpanded}
             aria-label={
               isExpanded ? "Show less description" : "Show more description"
