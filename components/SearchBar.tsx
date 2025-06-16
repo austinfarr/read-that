@@ -70,6 +70,7 @@ export function SearchBar() {
     } else {
       setResults([]);
       setHasSearched(false);
+      setShowResults(false);
     }
 
     return () => {
@@ -104,10 +105,17 @@ export function SearchBar() {
               placeholder="Search books..."
               value={query}
               onChange={(e) => {
-                setQuery(e.target.value);
-                setShowResults(true);
+                const newQuery = e.target.value;
+                setQuery(newQuery);
+                if (newQuery.trim()) {
+                  setShowResults(true);
+                }
               }}
-              onFocus={() => setShowResults(true)}
+              onFocus={() => {
+                if (query || results.length > 0) {
+                  setShowResults(true);
+                }
+              }}
               className="w-full pr-10"
             />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -119,7 +127,7 @@ export function SearchBar() {
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          {(results.length > 0 || isLoading || query) && (
+          {(results.length > 0 || isLoading || (query && hasSearched)) && (
             <SearchResults
               results={results}
               query={query}
