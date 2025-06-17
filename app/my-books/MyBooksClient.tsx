@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Star,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Heart,
-} from "lucide-react";
+import { Star, Clock, CheckCircle, XCircle, Heart } from "lucide-react";
 import { type UserBook } from "@/utils/supabase";
 import BookCard from "@/components/BookCard";
 import { Book } from "@/types/book";
@@ -18,7 +12,10 @@ interface MyBooksClientProps {
   booksData: Record<string, Book>;
 }
 
-export default function MyBooksClient({ userBooks, booksData }: MyBooksClientProps) {
+export default function MyBooksClient({
+  userBooks,
+  booksData,
+}: MyBooksClientProps) {
   const [activeTab, setActiveTab] = useState("all");
 
   const filterBooksByStatus = (status?: string) => {
@@ -82,16 +79,10 @@ export default function MyBooksClient({ userBooks, booksData }: MyBooksClientPro
   };
 
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="space-y-6"
-    >
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
       <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
-        <TabsTrigger value="reading">
-          Reading ({tabCounts.reading})
-        </TabsTrigger>
+        <TabsTrigger value="reading">Reading ({tabCounts.reading})</TabsTrigger>
         <TabsTrigger value="want_to_read">
           Want to Read ({tabCounts.want_to_read})
         </TabsTrigger>
@@ -171,15 +162,6 @@ export default function MyBooksClient({ userBooks, booksData }: MyBooksClientPro
                         {book.author}
                       </p>
                     </div>
-
-                    {/* Notes preview */}
-                    {userBook.notes && (
-                      <div className="p-2.5 bg-slate-900/50 rounded-lg border border-slate-800/50">
-                        <p className="text-xs text-slate-400 line-clamp-2">
-                          {userBook.notes}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
