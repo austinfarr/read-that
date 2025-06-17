@@ -29,16 +29,37 @@ export async function getBooksByIds(ids: string[]): Promise<any[]> {
   if (numericIds.length === 0) return [];
 
   try {
-    const response = await fetch("/api/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: GET_BOOKS_BY_IDS_QUERY,
-        variables: { ids: numericIds },
-      }),
-    });
+    // Check if we're on the server or client
+    const isServer = typeof window === 'undefined';
+    
+    let response;
+    
+    if (isServer) {
+      // On server, call Hardcover API directly
+      response = await fetch("https://api.hardcover.app/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
+        },
+        body: JSON.stringify({
+          query: GET_BOOKS_BY_IDS_QUERY,
+          variables: { ids: numericIds },
+        }),
+      });
+    } else {
+      // On client, use the proxy API route
+      response = await fetch("/api/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: GET_BOOKS_BY_IDS_QUERY,
+          variables: { ids: numericIds },
+        }),
+      });
+    }
 
     if (!response.ok) {
       throw new Error("Failed to fetch books");
