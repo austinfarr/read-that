@@ -37,7 +37,6 @@ export interface HardcoverSearchBook extends BaseBook {
 export interface LocalBook extends BaseBook {
   id: number;
   author: string;
-  coverUrl: string;
   pageCount?: number;
   unread?: boolean;
 }
@@ -56,14 +55,18 @@ export interface Book {
 }
 
 // Utility function to normalize different book types to the unified Book interface
-export function normalizeBook(book: HardcoverBook | HardcoverSearchBook | LocalBook): Book {
+export function normalizeBook(
+  book: HardcoverBook | HardcoverSearchBook | LocalBook
+): Book {
   // Handle HardcoverBook (from book detail page)
-  if ('contributions' in book) {
+  if ("contributions" in book) {
     const hardcoverBook = book as HardcoverBook;
     return {
       id: hardcoverBook.id,
       title: hardcoverBook.title,
-      author: hardcoverBook.contributions?.map(c => c.author.name) || ['Unknown Author'],
+      author: hardcoverBook.contributions?.map((c) => c.author.name) || [
+        "Unknown Author",
+      ],
       imageUrl: hardcoverBook.image?.url,
       description: hardcoverBook.description,
       pageCount: hardcoverBook.pages,
@@ -73,12 +76,12 @@ export function normalizeBook(book: HardcoverBook | HardcoverSearchBook | LocalB
   }
 
   // Handle HardcoverSearchBook (from search results)
-  if ('author_names' in book) {
+  if ("author_names" in book) {
     const searchBook = book as HardcoverSearchBook;
     return {
       id: searchBook.id,
       title: searchBook.title,
-      author: searchBook.author_names || ['Unknown Author'],
+      author: searchBook.author_names || ["Unknown Author"],
       imageUrl: searchBook.image?.url,
       description: searchBook.description,
     };
@@ -90,7 +93,7 @@ export function normalizeBook(book: HardcoverBook | HardcoverSearchBook | LocalB
     id: localBook.id,
     title: localBook.title,
     author: localBook.author,
-    imageUrl: localBook.coverUrl,
+    imageUrl: localBook.coverUrl || "",
     description: localBook.description,
     pageCount: localBook.pageCount,
     unread: localBook.unread,
