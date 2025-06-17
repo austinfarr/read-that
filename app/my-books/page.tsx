@@ -35,25 +35,25 @@ export default function MyBooksPage() {
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
-      
+
       const userBooksData = data || [];
       setUserBooks(userBooksData);
 
       // Extract unique hardcover IDs
       const hardcoverIds = userBooksData
-        .filter(ub => ub.hardcover_id)
-        .map(ub => ub.hardcover_id as string);
+        .filter((ub) => ub.hardcover_id)
+        .map((ub) => ub.hardcover_id as string);
 
       if (hardcoverIds.length > 0) {
         // Fetch book details from Hardcover API
         const books = await getBooksByIds(hardcoverIds);
-        
+
         // Convert to a map for easy lookup
         const booksMap: Record<string, Book> = {};
-        books.forEach(book => {
+        books.forEach((book) => {
           booksMap[book.id.toString()] = hardcoverToBook(book);
         });
-        
+
         setBooksData(booksMap);
       }
     } catch (error) {
@@ -74,7 +74,7 @@ export default function MyBooksPage() {
     if (userBook.hardcover_id && booksData[userBook.hardcover_id]) {
       return booksData[userBook.hardcover_id];
     }
-    
+
     // Fallback if no book data
     return {
       id: userBook.id,
@@ -171,44 +171,66 @@ export default function MyBooksPage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {filterBooksByStatus(
                     activeTab === "favorites" ? "favorites" : activeTab
-                  ).map((userBook) => (
-                    <div key={userBook.id} className="relative">
-                      <BookCard book={convertToBookType(userBook)} />
+                  ).map((userBook) => {
+                    const book = convertToBookType(userBook);
+                    return (
+                      <div
+                        key={userBook.id}
+                        className="flex flex-col items-center space-y-4"
+                      >
+                        {/* Book card with custom wrapper to control hover area */}
+                        <div className="relative flex justify-center">
+                          <BookCard book={book} href={`/books/${book.id}`} />
 
-                      {/* Status badge */}
-                      <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 text-sm">
-                        {getStatusIcon(userBook.status)}
-                        <span>{getStatusLabel(userBook.status)}</span>
+                          {/* Overlay badges on the card */}
+                          <div className="absolute inset-0 pointer-events-none">
+                            {/* Status badge */}
+                            <div className="absolute top-2 right-2 bg-slate-900/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5 text-xs border border-slate-700/50">
+                              {getStatusIcon(userBook.status)}
+                              <span className="text-slate-200">
+                                {getStatusLabel(userBook.status)}
+                              </span>
+                            </div>
+
+                            {/* Favorite indicator */}
+                            {userBook.is_favorite && (
+                              <div className="absolute top-2 left-2">
+                                <div className="w-7 h-7 bg-slate-900/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-slate-700/50">
+                                  <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Rating */}
+                            {userBook.rating && (
+                              <div className="absolute bottom-2 left-2 bg-slate-900/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5 text-xs border border-slate-700/50">
+                                <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                                <span className="text-slate-200 font-medium">
+                                  {userBook.rating}/10
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Book info and notes below the card */}
+                        <div className="w-full max-w-[180px] space-y-2">
+                          {/* Book title and author for always visible info */}
+                          <div className="text-center">
+                            <h3 className="font-medium text-sm line-clamp-1">
+                              {book.title}
+                            </h3>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {book.author}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-
-                      {/* Favorite indicator */}
-                      {userBook.is_favorite && (
-                        <div className="absolute top-2 left-2">
-                          <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-                        </div>
-                      )}
-
-                      {/* Rating */}
-                      {userBook.rating && (
-                        <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 text-sm">
-                          <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                          <span>{userBook.rating}/10</span>
-                        </div>
-                      )}
-
-                      {/* Notes preview */}
-                      {userBook.notes && (
-                        <div className="mt-2 p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {userBook.notes}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
