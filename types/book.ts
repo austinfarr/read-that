@@ -46,7 +46,7 @@ export interface Book {
   id: string | number;
   title: string;
   author: string | string[];
-  imageUrl?: string;
+  coverUrl?: string;
   description?: string;
   pageCount?: number;
   releaseDate?: string;
