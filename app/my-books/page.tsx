@@ -1,10 +1,9 @@
+import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
-import { BooksLibrary } from "@/app/my-books/components/BooksLibrary";
-import { fetchUserBooks } from "@/app/my-books/actions";
+import { BooksLibraryData } from "@/app/my-books/components/BooksLibraryData";
+import { BooksLibraryLoading } from "@/app/my-books/components/BooksLibraryLoading";
 
-export default async function MyBooksPage() {
-  const { userBooks, booksData } = await fetchUserBooks();
-
+export default function MyBooksPage() {
   return (
     <div className="min-h-screen pt-24 px-4">
       <div className="max-w-4xl mx-auto">
@@ -14,7 +13,9 @@ export default async function MyBooksPage() {
             <BookOpen className="w-8 h-8 text-primary" />
           </h1>
         </div>
-        <BooksLibrary userBooks={userBooks} booksData={booksData} />
+        <Suspense fallback={<BooksLibraryLoading />}>
+          <BooksLibraryData />
+        </Suspense>
       </div>
     </div>
   );
