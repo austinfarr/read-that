@@ -88,7 +88,7 @@ export function BooksLibrary({ userBooks, booksData }: BooksLibraryProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Filter Buttons */}
       <div className="flex flex-wrap gap-2">
         <button
