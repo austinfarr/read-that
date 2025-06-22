@@ -228,3 +228,87 @@ export async function getUserBookStatus(hardcoverId: string) {
 
   return data?.status || null;
 }
+
+export async function getUserReview(hardcoverId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("id, rating, review_text, is_spoiler")
+    .eq("user_id", SAMPLE_USER_ID)
+    .eq("hardcover_id", hardcoverId)
+    .single();
+
+  if (error) {
+    // User hasn't reviewed this book
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateReview(
+  reviewId: string,
+  rating: number,
+  reviewText: string,
+  isSpoiler: boolean
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .update({
+      rating,
+      review_text: reviewText.trim() || null,
+      is_spoiler: isSpoiler,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reviewId)
+    .eq("user_id", SAMPLE_USER_ID) // Security: only allow updating own reviews
+    .select("*, hardcover_id")
+    .single();
+
+  if (error) {
+    console.error("Error updating review:", error);
+    throw new Error(error.message);
+  }
+
+  // Revalidate the book page and my-books page
+  revalidatePath(`/books/${data.hardcover_id}`);
+  revalidatePath('/my-books');
+
+  return data;
+}
+
+export async function deleteReview(reviewId: string) {
+  const supabase = await createClient();
+
+  // First get the review to get the hardcover_id for revalidation
+  const { data: review } = await supabase
+    .from("reviews")
+    .select("hardcover_id")
+    .eq("id", reviewId)
+    .eq("user_id", SAMPLE_USER_ID)
+    .single();
+
+  if (!review) {
+    throw new Error("Review not found or unauthorized");
+  }
+
+  const { error } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("id", reviewId)
+    .eq("user_id", SAMPLE_USER_ID); // Security: only allow deleting own reviews
+
+  if (error) {
+    console.error("Error deleting review:", error);
+    throw new Error(error.message);
+  }
+
+  // Revalidate the book page and my-books page
+  revalidatePath(`/books/${review.hardcover_id}`);
+  revalidatePath('/my-books');
+
+  return { success: true };
+}

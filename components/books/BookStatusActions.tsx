@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ import {
   Star,
   Check
 } from "lucide-react";
-import { addToBookshelf, removeFromBookshelf } from "@/app/books/[id]/actions";
+import { addToBookshelf, removeFromBookshelf, getUserReview } from "@/app/books/[id]/actions";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 
 interface BookStatusActionsProps {
@@ -43,6 +43,24 @@ export function BookStatusActions({
 }: BookStatusActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [existingReview, setExistingReview] = useState<{ id: string; rating: number; review_text: string | null; is_spoiler: boolean } | null>(null);
+  const [isLoadingReview, setIsLoadingReview] = useState(true);
+
+  // Load existing review on component mount
+  useEffect(() => {
+    const loadExistingReview = async () => {
+      try {
+        const review = await getUserReview(hardcoverId);
+        setExistingReview(review);
+      } catch (error) {
+        console.error("Error loading existing review:", error);
+      } finally {
+        setIsLoadingReview(false);
+      }
+    };
+
+    loadExistingReview();
+  }, [hardcoverId]);
 
   const handleStatusChange = async (status: 'want_to_read' | 'reading' | 'finished') => {
     startTransition(async () => {
@@ -70,8 +88,17 @@ export function BookStatusActions({
     });
   };
 
-  const handleReviewSubmitted = () => {
+  const handleReviewSubmitted = async () => {
     setIsReviewDialogOpen(false);
+    
+    // Refresh the existing review data
+    try {
+      const review = await getUserReview(hardcoverId);
+      setExistingReview(review);
+    } catch (error) {
+      console.error("Error refreshing review data:", error);
+    }
+    
     if (onStatusChange) {
       onStatusChange();
     }
@@ -213,6 +240,10 @@ export function BookStatusActions({
                 <Clock className="w-4 h-4 mr-2" />
                 Currently Reading
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleRemove} className="text-red-600 focus:text-red-600">
+                <X className="w-4 h-4 mr-2" />
+                Remove from Library
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -229,27 +260,37 @@ export function BookStatusActions({
       <Button 
         onClick={() => setIsReviewDialogOpen(true)}
         variant="outline"
-        disabled={loading}
+        disabled={loading || isLoadingReview}
         className="w-full border-yellow-500/30 hover:border-yellow-500 hover:bg-yellow-500/10"
       >
         <Star className="w-4 h-4 mr-2" />
-        Rate this book
+        {isLoadingReview 
+          ? "Loading..." 
+          : existingReview 
+            ? `Update rating (${existingReview.rating}/10)` 
+            : "Rate this book"
+        }
       </Button>
 
       {/* Review Dialog */}
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Review "{bookTitle}"</DialogTitle>
+            <DialogTitle>
+              {existingReview ? `Update Review for "${bookTitle}"` : `Review "${bookTitle}"`}
+            </DialogTitle>
             <DialogDescription>
-              Share your thoughts and rating for this book with the community.
-              This will mark the book as finished in your library.
+              {existingReview 
+                ? "Update your thoughts and rating for this book."
+                : "Share your thoughts and rating for this book with the community. This will mark the book as finished in your library."
+              }
             </DialogDescription>
           </DialogHeader>
           <ReviewForm 
             hardcoverId={hardcoverId} 
             bookId={bookId}
             onReviewSubmitted={handleReviewSubmitted}
+            existingReview={existingReview}
           />
         </DialogContent>
       </Dialog>

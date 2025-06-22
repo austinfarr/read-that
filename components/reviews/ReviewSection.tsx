@@ -1,17 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { MessageSquare, PenSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ReviewForm } from "./ReviewForm";
+import { MessageSquare } from "lucide-react";
 import { ReviewsList } from "./ReviewsList";
 
 interface ReviewSectionProps {
@@ -20,15 +7,7 @@ interface ReviewSectionProps {
   bookTitle: string;
 }
 
-export function ReviewSection({ hardcoverId, bookId, bookTitle }: ReviewSectionProps) {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleReviewSubmitted = () => {
-    setRefreshTrigger(prev => prev + 1);
-    setIsDialogOpen(false);
-  };
-
+export async function ReviewSection({ hardcoverId, bookId, bookTitle }: ReviewSectionProps) {
   return (
     <div className="bg-gradient-to-r from-muted/30 to-muted/20 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-border/20">
       <div className="flex items-center justify-between mb-6">
@@ -37,31 +16,9 @@ export function ReviewSection({ hardcoverId, bookId, bookTitle }: ReviewSectionP
           <h2 className="text-xl sm:text-2xl font-bold">Community Reviews</h2>
           <MessageSquare className="w-5 h-5 text-muted-foreground" />
         </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white">
-              <PenSquare className="w-4 h-4 mr-2" />
-              Write a Review
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Review "{bookTitle}"</DialogTitle>
-              <DialogDescription>
-                Share your thoughts and rating for this book with the community.
-              </DialogDescription>
-            </DialogHeader>
-            <ReviewForm 
-              hardcoverId={hardcoverId} 
-              bookId={bookId}
-              onReviewSubmitted={handleReviewSubmitted}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <ReviewsList hardcoverId={hardcoverId} refreshTrigger={refreshTrigger} />
+      <ReviewsList hardcoverId={hardcoverId} />
     </div>
   );
 }
