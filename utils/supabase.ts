@@ -32,7 +32,6 @@ export interface UserBook {
   start_date: string | null
   finish_date: string | null
   current_page: number | null
-  rating: number | null
   notes: string | null
   is_favorite: boolean
   is_private: boolean

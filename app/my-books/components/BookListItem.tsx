@@ -9,9 +9,10 @@ import Link from "next/link";
 interface BookListItemProps {
   userBook: UserBook;
   book: Book;
+  rating?: number;
 }
 
-export function BookListItem({ userBook, book }: BookListItemProps) {
+export function BookListItem({ userBook, book, rating }: BookListItemProps) {
   return (
     <Link href={`/books/${book.id}`} className="block">
       <Card className="border p-4 hover:shadow-md transition-shadow cursor-pointer">
@@ -72,9 +73,9 @@ export function BookListItem({ userBook, book }: BookListItemProps) {
             )}
 
             {/* Rating for finished books */}
-            {userBook.status === "finished" && userBook.rating && (
+            {userBook.status === "finished" && rating && (
               <div className="text-sm text-muted-foreground">
-                ⭐ Rating: {userBook.rating}/10
+                ⭐ Rating: {rating}/10
               </div>
             )}
 

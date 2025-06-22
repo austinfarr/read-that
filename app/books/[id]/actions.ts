@@ -37,6 +37,47 @@ export async function submitReview(
 ) {
   const supabase = await createClient();
 
+  // First, check if the book exists in user_books
+  const { data: existingUserBook } = await supabase
+    .from("user_books")
+    .select("id, status")
+    .eq("user_id", SAMPLE_USER_ID)
+    .eq("hardcover_id", hardcoverId)
+    .single();
+
+  // If the book doesn't exist in user_books, add it as "finished"
+  if (!existingUserBook) {
+    const { error: userBookError } = await supabase
+      .from("user_books")
+      .insert({
+        user_id: SAMPLE_USER_ID,
+        hardcover_id: hardcoverId,
+        book_id: bookId,
+        status: "finished",
+        finish_date: new Date().toISOString().split('T')[0], // Today's date
+      });
+
+    if (userBookError) {
+      console.error("Error adding book to user_books:", userBookError);
+      throw new Error(userBookError.message);
+    }
+  } else if (existingUserBook.status !== "finished") {
+    // If the book exists but isn't marked as finished, update it
+    const { error: updateError } = await supabase
+      .from("user_books")
+      .update({
+        status: "finished",
+        finish_date: new Date().toISOString().split('T')[0],
+      })
+      .eq("id", existingUserBook.id);
+
+    if (updateError) {
+      console.error("Error updating book status:", updateError);
+      throw new Error(updateError.message);
+    }
+  }
+
+  // Now submit the review
   const { data, error } = await supabase
     .from("reviews")
     .insert({

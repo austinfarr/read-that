@@ -15,9 +15,10 @@ import {
 interface BooksLibraryProps {
   userBooks: UserBook[];
   booksData: Record<string, Book>;
+  ratings: Record<string, number>;
 }
 
-export function BooksLibrary({ userBooks, booksData }: BooksLibraryProps) {
+export function BooksLibrary({ userBooks, booksData, ratings }: BooksLibraryProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   // Sort all books by most recent activity
@@ -40,6 +41,7 @@ export function BooksLibrary({ userBooks, booksData }: BooksLibraryProps) {
       <BookList
         userBooks={filteredBooks}
         booksData={booksData}
+        ratings={ratings}
       />
     </div>
   );

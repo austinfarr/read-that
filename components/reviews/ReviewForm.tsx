@@ -15,8 +15,7 @@ interface ReviewFormProps {
 }
 
 export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFormProps) {
-  const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
+  const [rating, setRating] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,8 +24,10 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (rating === 0) {
-      setError("Please select a rating");
+    const ratingNum = parseFloat(rating);
+    
+    if (!rating || isNaN(ratingNum) || ratingNum < 0 || ratingNum > 10) {
+      setError("Please enter a rating between 0 and 10");
       return;
     }
 
@@ -37,13 +38,13 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
       await submitReview(
         hardcoverId,
         bookId,
-        rating,
+        ratingNum,
         reviewText,
         isSpoiler
       );
 
       // Reset form
-      setRating(0);
+      setRating("");
       setReviewText("");
       setIsSpoiler(false);
       
@@ -61,27 +62,43 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label className="text-base font-semibold mb-2 block">Your Rating</Label>
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHoveredRating(star)}
-              onMouseLeave={() => setHoveredRating(0)}
-              className="p-1 transition-transform hover:scale-110"
-            >
-              <Star
-                className={`w-6 h-6 ${
-                  star <= (hoveredRating || rating)
-                    ? "fill-yellow-500 text-yellow-500"
-                    : "text-gray-300"
-                }`}
-              />
-            </button>
-          ))}
+        <Label htmlFor="rating" className="text-base font-semibold mb-2 block">
+          Your Rating (0-10)
+        </Label>
+        <div className="flex items-center gap-4">
+          <input
+            id="rating"
+            type="number"
+            min="0"
+            max="10"
+            step="0.1"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            placeholder="7.5"
+            className="w-24 px-3 py-2 text-lg font-semibold text-center border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700"
+          />
+          <div className="flex items-center gap-1">
+            {rating && !isNaN(parseFloat(rating)) && (
+              <>
+                {[...Array(10)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.floor(parseFloat(rating))
+                        ? "fill-yellow-500 text-yellow-500"
+                        : i < parseFloat(rating)
+                        ? "fill-yellow-500/50 text-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </>
+            )}
+          </div>
         </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          You can use decimals like 7.5 or 8.3
+        </p>
       </div>
 
       <div>
@@ -118,7 +135,7 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
 
       <Button
         type="submit"
-        disabled={isSubmitting || rating === 0}
+        disabled={isSubmitting || !rating || isNaN(parseFloat(rating))}
         className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
       >
         {isSubmitting ? "Submitting..." : "Submit Review"}

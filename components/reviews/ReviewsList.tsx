@@ -75,18 +75,9 @@ export function ReviewsList({ hardcoverId, refreshTrigger }: ReviewsListProps) {
                 <span className="font-semibold">
                   {review.user?.display_name || "Anonymous"}
                 </span>
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-4 h-4 ${
-                        star <= review.rating
-                          ? "fill-yellow-500 text-yellow-500"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
+                <span className="font-medium text-yellow-600 dark:text-yellow-500">
+                  {review.rating}/10
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
