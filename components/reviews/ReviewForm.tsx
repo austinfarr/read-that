@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star } from "lucide-react";
+import { Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { submitReview, updateReview } from "@/app/books/[id]/actions";
+import { submitReview, updateReview, deleteReview } from "@/app/books/[id]/actions";
 
 interface ReviewFormProps {
   hardcoverId: string;
@@ -20,6 +20,8 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted, existingRev
   const [reviewText, setReviewText] = useState("");
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Pre-populate form with existing review data
@@ -79,6 +81,27 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted, existingRev
       setError(existingReview ? "Failed to update review. Please try again." : "Failed to submit review. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!existingReview) return;
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      await deleteReview(existingReview.id);
+      
+      if (onReviewSubmitted) {
+        onReviewSubmitted();
+      }
+    } catch (err) {
+      console.error("Error deleting review:", err);
+      setError("Failed to delete review. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -156,16 +179,60 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted, existingRev
         <p className="text-sm text-red-500">{error}</p>
       )}
 
-      <Button
-        type="submit"
-        disabled={isSubmitting || !rating || isNaN(parseFloat(rating))}
-        className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-      >
-        {isSubmitting 
-          ? (existingReview ? "Updating..." : "Submitting...") 
-          : (existingReview ? "Update Review" : "Submit Review")
-        }
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          type="submit"
+          disabled={isSubmitting || isDeleting || !rating || isNaN(parseFloat(rating))}
+          className="flex-1 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+        >
+          {isSubmitting 
+            ? (existingReview ? "Updating..." : "Submitting...") 
+            : (existingReview ? "Update Review" : "Submit Review")
+          }
+        </Button>
+        
+        {existingReview && (
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isSubmitting || isDeleting}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-3"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 w-80 mx-4">
+            <h3 className="font-semibold mb-4">Delete Review</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Are you sure you want to delete this review? This action cannot be undone.
+              The book will remain in your library as finished.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                variant="destructive"
+                className="flex-1"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+              <Button
+                onClick={() => setShowDeleteConfirm(false)}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

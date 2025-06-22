@@ -279,3 +279,36 @@ export async function updateReview(
 
   return data;
 }
+
+export async function deleteReview(reviewId: string) {
+  const supabase = await createClient();
+
+  // First get the review to get the hardcover_id for revalidation
+  const { data: review } = await supabase
+    .from("reviews")
+    .select("hardcover_id")
+    .eq("id", reviewId)
+    .eq("user_id", SAMPLE_USER_ID)
+    .single();
+
+  if (!review) {
+    throw new Error("Review not found or unauthorized");
+  }
+
+  const { error } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("id", reviewId)
+    .eq("user_id", SAMPLE_USER_ID); // Security: only allow deleting own reviews
+
+  if (error) {
+    console.error("Error deleting review:", error);
+    throw new Error(error.message);
+  }
+
+  // Revalidate the book page and my-books page
+  revalidatePath(`/books/${review.hardcover_id}`);
+  revalidatePath('/my-books');
+
+  return { success: true };
+}

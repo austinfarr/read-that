@@ -240,6 +240,10 @@ export function BookStatusActions({
                 <Clock className="w-4 h-4 mr-2" />
                 Currently Reading
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleRemove} className="text-red-600 focus:text-red-600">
+                <X className="w-4 h-4 mr-2" />
+                Remove from Library
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
