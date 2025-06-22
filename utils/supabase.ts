@@ -52,5 +52,20 @@ export interface User {
   updated_at: string
 }
 
+export interface Review {
+  id: string
+  user_id: string
+  book_id: string | null
+  hardcover_id: string
+  rating: number
+  review_text: string | null
+  is_spoiler: boolean
+  helpful_count: number
+  created_at: string
+  updated_at: string
+  // Joined data
+  user?: User
+}
+
 // Sample user ID for development (replace with auth when implemented)
 export const SAMPLE_USER_ID = '0f797a63-1c1e-4ed9-836f-9bec0305c84a'

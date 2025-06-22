@@ -1,5 +1,7 @@
 import { BookDescription } from "@/components/BookDescription";
 import { Button } from "@/components/ui/button";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { getReviewStats } from "./actions";
 import {
   Bookmark,
   BookOpen,
@@ -74,6 +76,9 @@ export default async function BookPage({ params }: { params: { id: string } }) {
   if (!book) {
     notFound();
   }
+
+  // Get review stats
+  const reviewStats = await getReviewStats(id);
 
   // Extract authors from contributions
   const authors = book.contributions
@@ -190,23 +195,31 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                {/* Rating Placeholder */}
-                <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 px-2 lg:px-0 lg:ml-8 xl:ml-11">
-                  <div className="flex items-center gap-2">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 fill-yellow-500"
-                        />
-                      ))}
+                {/* Rating */}
+                {reviewStats.totalReviews > 0 && (
+                  <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 px-2 lg:px-0 lg:ml-8 xl:ml-11">
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                              star <= Math.round(reviewStats.averageRating)
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-base sm:text-lg font-medium">
+                        {reviewStats.averageRating}
+                      </span>
+                      <span className="text-sm sm:text-base text-muted-foreground">
+                        ({reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? 'rating' : 'ratings'})
+                      </span>
                     </div>
-                    <span className="text-base sm:text-lg font-medium">4.5</span>
-                    <span className="text-sm sm:text-base text-muted-foreground">
-                      (2,341 ratings)
-                    </span>
                   </div>
-                </div>
+                )}
 
                 {/* Action Buttons - Mobile only (hidden on desktop) */}
                 <div className="block sm:hidden w-full px-2">
@@ -286,6 +299,15 @@ export default async function BookPage({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="container mx-auto px-4 pb-8 sm:pb-16 max-w-6xl">
+        <ReviewSection 
+          hardcoverId={id} 
+          bookId={undefined}
+          bookTitle={book.title}
+        />
       </div>
 
       {/* Similar Books Section (placeholder) */}
