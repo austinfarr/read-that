@@ -16,12 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { 
-  Heart, 
   Clock, 
   CheckCircle, 
   ChevronDown,
   X,
-  Star
+  Star,
+  Check
 } from "lucide-react";
 import { addToBookshelf, removeFromBookshelf } from "@/app/books/[id]/actions";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
@@ -88,16 +88,15 @@ export function BookStatusActions({
           <Button 
             onClick={() => handleStatusChange('want_to_read')}
             disabled={loading}
-            className="bg-purple-500 hover:bg-purple-600 text-white rounded-r-none flex-1"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-r-none flex-1"
           >
-            <Heart className="w-4 h-4 mr-2" />
             Want to Read
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 disabled={loading}
-                className="bg-purple-500 hover:bg-purple-600 text-white rounded-l-none border-l border-purple-400 px-2"
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-l-none border-l border-blue-400 px-2"
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -123,16 +122,16 @@ export function BookStatusActions({
           <Button 
             onClick={handleRemove}
             disabled={loading}
-            className="bg-purple-600 hover:bg-purple-700 text-white rounded-r-none flex-1 border border-purple-500 shadow-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-r-none flex-1 border border-blue-500 shadow-md"
           >
-            <Heart className="w-4 h-4 mr-2 fill-current" />
-            ✓ Want to Read
+            <Check className="w-4 h-4 mr-2" />
+            Want to Read
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 disabled={loading}
-                className="bg-purple-600 hover:bg-purple-700 text-white rounded-l-none border-l border-purple-500 px-2 border border-purple-500 shadow-md"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-l-none border-l border-blue-500 px-2 border border-blue-500 shadow-md"
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -157,7 +156,7 @@ export function BookStatusActions({
         <div className="flex">
           <Button 
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-r-none flex-1"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-r-none flex-1"
           >
             <Clock className="w-4 h-4 mr-2" />
             Reading
@@ -166,14 +165,14 @@ export function BookStatusActions({
             <DropdownMenuTrigger asChild>
               <Button 
                 disabled={loading}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-l-none border-l border-blue-400 px-2"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-l-none border-l border-indigo-400 px-2"
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => handleStatusChange('want_to_read')}>
-                <Heart className="w-4 h-4 mr-2" />
+                <Check className="w-4 h-4 mr-2" />
                 Want to Read
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleStatusChange('finished')}>
@@ -207,7 +206,7 @@ export function BookStatusActions({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => handleStatusChange('want_to_read')}>
-                <Heart className="w-4 h-4 mr-2" />
+                <Check className="w-4 h-4 mr-2" />
                 Want to Read
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleStatusChange('reading')}>

@@ -55,20 +55,20 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
         <div className="flex flex-col gap-2">
           <button
             onClick={() => setShowProgressDialog(true)}
-            className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Update Progress
           </button>
           <button
             onClick={() => setShowNotesDialog(true)}
-            className="px-3 py-1 text-xs border rounded hover:bg-muted"
+            className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
           >
             Add Notes
           </button>
           <button
             onClick={handleMarkFinished}
             disabled={isUpdatingStatus}
-            className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
           >
             {isUpdatingStatus ? "..." : "Mark Finished"}
           </button>
@@ -100,13 +100,13 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
                   <button
                     onClick={handleUpdateProgress}
                     disabled={isUpdatingProgress}
-                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
                   >
                     {isUpdatingProgress ? "Updating..." : "Update"}
                   </button>
                   <button
                     onClick={() => setShowProgressDialog(false)}
-                    className="flex-1 px-4 py-2 border rounded hover:bg-muted"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </button>
@@ -134,13 +134,13 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
                 <div className="flex gap-2">
                   <button
                     onClick={handleUpdateNotes}
-                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
                     Save Notes
                   </button>
                   <button
                     onClick={() => setShowNotesDialog(false)}
-                    className="flex-1 px-4 py-2 border rounded hover:bg-muted"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </button>
@@ -158,7 +158,7 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
       <button
         onClick={handleStartReading}
         disabled={isUpdatingStatus}
-        className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
+        className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
       >
         {isUpdatingStatus ? "Starting..." : "Start Reading"}
       </button>
