@@ -291,7 +291,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Reviews Section */}
-      <div className="container mx-auto px-4 pb-8 sm:pb-16 max-w-6xl">
+      <div className="container mx-auto px-4 pb-8 py-8 sm:pb-16 max-w-6xl">
         <ReviewSection
           hardcoverId={id}
           bookId={undefined}

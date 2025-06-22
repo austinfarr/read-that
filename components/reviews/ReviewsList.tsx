@@ -1,61 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Star, ThumbsUp, AlertCircle } from "lucide-react";
-import { Review } from "@/utils/supabase";
-import { formatDistanceToNow } from "date-fns";
 import { fetchReviews } from "@/app/books/[id]/actions";
+import { formatDistanceToNow } from "date-fns";
+import { AlertCircle, ThumbsUp } from "lucide-react";
 
 interface ReviewsListProps {
   hardcoverId: string;
-  refreshTrigger?: number;
 }
 
-export function ReviewsList({ hardcoverId, refreshTrigger }: ReviewsListProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadReviews();
-  }, [hardcoverId, refreshTrigger]);
-
-  const loadReviews = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await fetchReviews(hardcoverId);
-      setReviews(data);
-    } catch (err: any) {
-      console.error("Error fetching reviews:", err);
-      setError("Failed to load reviews");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse">
-            <div className="h-4 bg-muted rounded w-1/4 mb-2" />
-            <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-            <div className="h-4 bg-muted rounded w-1/2" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-sm">
-        {error}
-      </div>
-    );
-  }
+export async function ReviewsList({
+  hardcoverId,
+}: ReviewsListProps) {
+  const reviews = await fetchReviews(hardcoverId);
 
   if (reviews.length === 0) {
     return (
@@ -68,7 +22,10 @@ export function ReviewsList({ hardcoverId, refreshTrigger }: ReviewsListProps) {
   return (
     <div className="space-y-6">
       {reviews.map((review) => (
-        <div key={review.id} className="border-b border-border/50 last:border-0 pb-6 last:pb-0">
+        <div
+          key={review.id}
+          className="border-b border-border/50 last:border-0 pb-6 last:pb-0"
+        >
           <div className="flex items-start justify-between mb-2">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -80,7 +37,9 @@ export function ReviewsList({ hardcoverId, refreshTrigger }: ReviewsListProps) {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                {formatDistanceToNow(new Date(review.created_at), {
+                  addSuffix: true,
+                })}
               </p>
             </div>
           </div>
@@ -93,7 +52,13 @@ export function ReviewsList({ hardcoverId, refreshTrigger }: ReviewsListProps) {
           )}
 
           {review.review_text && (
-            <p className={`text-sm leading-relaxed ${review.is_spoiler ? "blur-sm hover:blur-none transition-all cursor-pointer" : ""}`}>
+            <p
+              className={`text-sm leading-relaxed ${
+                review.is_spoiler
+                  ? "blur-sm hover:blur-none transition-all cursor-pointer"
+                  : ""
+              }`}
+            >
               {review.review_text}
             </p>
           )}

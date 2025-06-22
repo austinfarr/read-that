@@ -1,25 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { submitReview } from "@/app/books/[id]/actions";
+import { submitReview, updateReview } from "@/app/books/[id]/actions";
 
 interface ReviewFormProps {
   hardcoverId: string;
   bookId?: string;
   onReviewSubmitted?: () => void;
+  existingReview?: { id: string; rating: number; review_text: string | null; is_spoiler: boolean } | null;
 }
 
-export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFormProps) {
+export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted, existingReview }: ReviewFormProps) {
   const [rating, setRating] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-populate form with existing review data
+  useEffect(() => {
+    if (existingReview) {
+      setRating(existingReview.rating.toString());
+      setReviewText(existingReview.review_text || "");
+      setIsSpoiler(existingReview.is_spoiler);
+    }
+  }, [existingReview]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,25 +45,38 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
     setError(null);
 
     try {
-      await submitReview(
-        hardcoverId,
-        bookId,
-        ratingNum,
-        reviewText,
-        isSpoiler
-      );
+      if (existingReview) {
+        // Update existing review
+        await updateReview(
+          existingReview.id,
+          ratingNum,
+          reviewText,
+          isSpoiler
+        );
+      } else {
+        // Submit new review
+        await submitReview(
+          hardcoverId,
+          bookId,
+          ratingNum,
+          reviewText,
+          isSpoiler
+        );
+      }
 
-      // Reset form
-      setRating("");
-      setReviewText("");
-      setIsSpoiler(false);
+      // Reset form only for new reviews
+      if (!existingReview) {
+        setRating("");
+        setReviewText("");
+        setIsSpoiler(false);
+      }
       
       if (onReviewSubmitted) {
         onReviewSubmitted();
       }
     } catch (err) {
       console.error("Error submitting review:", err);
-      setError("Failed to submit review. Please try again.");
+      setError(existingReview ? "Failed to update review. Please try again." : "Failed to submit review. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +161,10 @@ export function ReviewForm({ hardcoverId, bookId, onReviewSubmitted }: ReviewFor
         disabled={isSubmitting || !rating || isNaN(parseFloat(rating))}
         className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
       >
-        {isSubmitting ? "Submitting..." : "Submit Review"}
+        {isSubmitting 
+          ? (existingReview ? "Updating..." : "Submitting...") 
+          : (existingReview ? "Update Review" : "Submit Review")
+        }
       </Button>
     </form>
   );
