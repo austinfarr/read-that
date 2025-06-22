@@ -1,16 +1,11 @@
 import { BookDescription } from "@/components/BookDescription";
+import { BookStatusActions } from "@/components/books/BookStatusActions";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { Button } from "@/components/ui/button";
-import {
-  Bookmark,
-  BookOpen,
-  Calendar,
-  Heart,
-  Share2,
-  Sparkles,
-  Star,
-} from "lucide-react";
+import { BookOpen, Calendar, Share2, Sparkles, Star } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { getReviewStats, getUserBookStatus } from "./actions";
 
 // GraphQL query with verified fields
 const GET_BOOK_DETAILS_QUERY = `
@@ -75,6 +70,10 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
+  // Get review stats and user book status
+  const reviewStats = await getReviewStats(id);
+  const userBookStatus = await getUserBookStatus(id);
+
   // Extract authors from contributions
   const authors = book.contributions
     ?.filter((contribution: any) => contribution.author)
@@ -94,7 +93,6 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       {/* Hero Section with Book Cover Background */}
       <div className="relative overflow-hidden">
-
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background z-10" />
 
@@ -138,18 +136,13 @@ export default async function BookPage({ params }: { params: { id: string } }) {
 
                 {/* Action Buttons - Desktop only (hidden on mobile) */}
                 <div className="mt-4 sm:mt-6 w-full max-w-xs lg:max-w-none hidden sm:block">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
-                    <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white text-sm px-4 py-2">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Add to Favorites
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 text-sm px-4 py-2"
-                    >
-                      <Bookmark className="w-4 h-4 mr-2" />
-                      Want to Read
-                    </Button>
+                  <div className="grid grid-cols-1 gap-2">
+                    <BookStatusActions
+                      hardcoverId={id}
+                      bookId={undefined}
+                      bookTitle={book.title}
+                      currentStatus={userBookStatus}
+                    />
                     <Button variant="outline" className="text-sm px-4 py-2">
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
@@ -190,39 +183,46 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                {/* Rating Placeholder */}
-                <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 px-2 lg:px-0 lg:ml-8 xl:ml-11">
-                  <div className="flex items-center gap-2">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 fill-yellow-500"
-                        />
-                      ))}
+                {/* Rating */}
+                {reviewStats.totalReviews > 0 && (
+                  <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 px-2 lg:px-0 lg:ml-8 xl:ml-11">
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                              star <= Math.round(reviewStats.averageRating)
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-base sm:text-lg font-medium">
+                        {reviewStats.averageRating}
+                      </span>
+                      <span className="text-sm sm:text-base text-muted-foreground">
+                        ({reviewStats.totalReviews}{" "}
+                        {reviewStats.totalReviews === 1 ? "rating" : "ratings"})
+                      </span>
                     </div>
-                    <span className="text-base sm:text-lg font-medium">4.5</span>
-                    <span className="text-sm sm:text-base text-muted-foreground">
-                      (2,341 ratings)
-                    </span>
                   </div>
-                </div>
+                )}
 
                 {/* Action Buttons - Mobile only (hidden on desktop) */}
                 <div className="block sm:hidden w-full px-2">
                   <div className="grid grid-cols-1 gap-2">
-                    <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white text-sm px-4 py-2 w-full">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Add to Favorites
-                    </Button>
+                    <BookStatusActions
+                      hardcoverId={id}
+                      bookId={undefined}
+                      bookTitle={book.title}
+                      currentStatus={userBookStatus}
+                    />
                     <Button
                       variant="outline"
-                      className="border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 text-sm px-4 py-2 w-full"
+                      className="text-sm px-4 py-2 w-full"
                     >
-                      <Bookmark className="w-4 h-4 mr-2" />
-                      Want to Read
-                    </Button>
-                    <Button variant="outline" className="text-sm px-4 py-2 w-full">
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
@@ -276,7 +276,9 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     <div className="bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-border/20">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-1 h-6 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
-                        <h3 className="text-base sm:text-lg font-bold">About this book</h3>
+                        <h3 className="text-base sm:text-lg font-bold">
+                          About this book
+                        </h3>
                       </div>
                       <BookDescription description={book.description} />
                     </div>
@@ -288,11 +290,22 @@ export default async function BookPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
+      {/* Reviews Section */}
+      <div className="container mx-auto px-4 pb-8 sm:pb-16 max-w-6xl">
+        <ReviewSection
+          hardcoverId={id}
+          bookId={undefined}
+          bookTitle={book.title}
+        />
+      </div>
+
       {/* Similar Books Section (placeholder) */}
       <div className="container mx-auto px-4 pb-8 sm:pb-16 max-w-6xl">
         <div className="flex items-center justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
           <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 rounded-full" />
-          <h2 className="text-xl sm:text-2xl font-bold">Readers also enjoyed</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">
+            Readers also enjoyed
+          </h2>
         </div>
         <div className="bg-gradient-to-r from-muted/30 to-muted/20 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-border/20 text-center">
           <p className="text-sm sm:text-base text-muted-foreground">

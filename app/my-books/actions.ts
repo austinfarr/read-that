@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 export async function fetchUserBooks(): Promise<{
   userBooks: UserBook[];
   booksData: Record<string, Book>;
+  ratings: Record<string, number>;
 }> {
   try {
     // Import server client dynamically to avoid edge cases
@@ -22,6 +23,21 @@ export async function fetchUserBooks(): Promise<{
     if (error) throw error;
 
     const userBooksData = data || [];
+    
+    // Fetch ratings from reviews table
+    const { data: reviewsData } = await supabase
+      .from("reviews")
+      .select("hardcover_id, rating")
+      .eq("user_id", SAMPLE_USER_ID);
+    
+    const ratings: Record<string, number> = {};
+    if (reviewsData) {
+      reviewsData.forEach(review => {
+        if (review.hardcover_id) {
+          ratings[review.hardcover_id] = review.rating;
+        }
+      });
+    }
 
     // Extract unique hardcover IDs
     const hardcoverIds = userBooksData
@@ -40,10 +56,10 @@ export async function fetchUserBooks(): Promise<{
       });
     }
 
-    return { userBooks: userBooksData, booksData };
+    return { userBooks: userBooksData, booksData, ratings };
   } catch (error) {
     console.error("Error fetching user books:", error);
-    return { userBooks: [], booksData: {} };
+    return { userBooks: [], booksData: {}, ratings: {} };
   }
 }
 

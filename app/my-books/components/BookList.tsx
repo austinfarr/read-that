@@ -6,9 +6,10 @@ import { convertToBookType } from "../utils/bookUtils";
 interface BookListProps {
   userBooks: UserBook[];
   booksData: Record<string, Book>;
+  ratings: Record<string, number>;
 }
 
-export function BookList({ userBooks, booksData }: BookListProps) {
+export function BookList({ userBooks, booksData, ratings }: BookListProps) {
   if (userBooks.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -21,11 +22,13 @@ export function BookList({ userBooks, booksData }: BookListProps) {
     <div className="space-y-4">
       {userBooks.map((userBook) => {
         const book = convertToBookType(userBook, booksData);
+        const rating = userBook.hardcover_id ? ratings[userBook.hardcover_id] : undefined;
         return (
           <BookListItem
             key={userBook.id}
             userBook={userBook}
             book={book}
+            rating={rating}
           />
         );
       })}

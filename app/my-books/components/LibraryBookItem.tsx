@@ -6,9 +6,10 @@ import { Book } from "@/types/book";
 interface LibraryBookItemProps {
   book: Book;
   userBook: UserBook;
+  rating?: number;
 }
 
-export function LibraryBookItem({ book, userBook }: LibraryBookItemProps) {
+export function LibraryBookItem({ book, userBook, rating }: LibraryBookItemProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "reading":
@@ -63,11 +64,11 @@ export function LibraryBookItem({ book, userBook }: LibraryBookItemProps) {
           )}
 
           {/* Rating */}
-          {userBook.rating && (
+          {rating && (
             <div className="absolute bottom-2 left-2 bg-slate-900/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5 text-xs border border-slate-700/50">
               <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
               <span className="text-slate-200 font-medium">
-                {userBook.rating}/10
+                {rating}/10
               </span>
             </div>
           )}
