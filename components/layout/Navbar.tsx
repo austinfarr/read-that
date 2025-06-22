@@ -17,9 +17,16 @@ import Link from "next/link";
 // import { randomUUID } from "crypto";
 import { usePathname } from "next/navigation";
 import SearchBar from "../SearchBar";
+import { useState, useEffect } from "react";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Close drawer when pathname changes
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [pathname]);
 
   // Hide navbar on search page for fullscreen experience
   if (pathname === "/search") {
@@ -92,7 +99,7 @@ const Navbar = ({}) => {
           <div className="flex md:hidden items-center gap-2">
             <SearchBar />
 
-            <Drawer direction="right">
+            <Drawer direction="right" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
               <DrawerTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
                   <Menu className="h-6 w-6 scale-110" />
