@@ -140,6 +140,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     <BookStatusActions
                       hardcoverId={id}
                       bookId={undefined}
+                      bookTitle={book.title}
                       currentStatus={userBookStatus}
                     />
                     <Button variant="outline" className="text-sm px-4 py-2">
@@ -215,6 +216,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     <BookStatusActions
                       hardcoverId={id}
                       bookId={undefined}
+                      bookTitle={book.title}
                       currentStatus={userBookStatus}
                     />
                     <Button
