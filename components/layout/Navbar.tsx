@@ -1,14 +1,16 @@
 "use client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Menu, Compass, BookOpen } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { BookOpen, Compass, Menu, X } from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
@@ -90,44 +92,66 @@ const Navbar = ({}) => {
           <div className="flex md:hidden items-center gap-2">
             <SearchBar />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Drawer direction="right">
+              <DrawerTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
                   <Menu className="h-6 w-6 scale-110" />
                 </Button>
-              </DropdownMenuTrigger>
+              </DrawerTrigger>
 
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href="/explore" className="flex items-center gap-2">
-                    <Compass className="w-4 h-4" />
-                    <span>Explore</span>
+              <DrawerContent side="right" className="w-72">
+                <DrawerHeader className="border-b px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <DrawerTitle>Menu</DrawerTitle>
+                    <DrawerClose asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </DrawerClose>
+                  </div>
+                </DrawerHeader>
+
+                <nav className="flex flex-col p-6 space-y-1">
+                  <Link
+                    href="/explore"
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      pathname === "/explore"
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Compass className="w-5 h-5" />
+                    <span className="font-medium">Explore</span>
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/my-books" className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    <span>My Books</span>
+
+                  <Link
+                    href="/my-books"
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      pathname === "/my-books"
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    <span className="font-medium">My Books</span>
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <div className="flex items-center gap-2 w-full">
-                    <span className="text-sm">Theme</span>
-                    <div className="ml-auto">
+
+                  <div className="pt-4 border-t mt-4">
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <span className="font-medium">Theme</span>
                       <ThemeToggle />
                     </div>
                   </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Button variant="secondary" className="w-full text-sm">
-                    Login
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Button className="w-full text-sm">Get Started</Button>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+                  <div className="pt-4 space-y-2">
+                    <Button variant="secondary" className="w-full">
+                      Login
+                    </Button>
+                    <Button className="w-full">Get Started</Button>
+                  </div>
+                </nav>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
       </Card>
