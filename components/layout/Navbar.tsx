@@ -35,39 +35,6 @@ const Navbar = ({}) => {
   const { authUser, profile, loading } = useUser();
   const supabase = createClient();
 
-  // Debug logging to understand the issue
-  useEffect(() => {
-    console.log('Navbar render:', { 
-      pathname, 
-      authUser: !!authUser, 
-      authUserId: authUser?.id, 
-      profile: !!profile, 
-      loading 
-    });
-  }, [pathname, authUser, profile, loading]);
-
-  // Force refresh if we're on a protected page but appear logged out
-  useEffect(() => {
-    const protectedPaths = ['/my-books', '/profile', '/settings'];
-    const isProtectedPath = protectedPaths.includes(pathname);
-    
-    // If we're on a protected page, not loading, but have no auth user,
-    // and the page itself loaded (meaning server-side auth worked),
-    // force a client-side auth refresh
-    if (isProtectedPath && !loading && !authUser) {
-      console.log('Force refresh auth on protected page:', pathname);
-      // Small delay to let any pending auth updates settle
-      const timer = setTimeout(async () => {
-        try {
-          await supabase.auth.refreshSession();
-        } catch (error) {
-          console.error('Error refreshing session in Navbar:', error);
-        }
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [pathname, loading, authUser, supabase]);
 
   // Close drawer when pathname changes
   useEffect(() => {

@@ -50,7 +50,13 @@ export async function updateSession(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('next', request.nextUrl.pathname)
+    // For my-books, redirect to explore after login to avoid the OAuth issue
+    // Users can navigate to my-books after they're logged in
+    if (request.nextUrl.pathname === '/my-books') {
+      url.searchParams.set('next', '/explore')
+    } else {
+      url.searchParams.set('next', request.nextUrl.pathname)
+    }
     return NextResponse.redirect(url)
   }
 
