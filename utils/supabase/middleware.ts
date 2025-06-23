@@ -35,19 +35,24 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // For now, don't redirect unauthenticated users since we're not using auth yet
-  // This can be uncommented when authentication is implemented:
-  /*
+  // Protected routes that require authentication
+  const protectedPaths = ['/my-books', '/profile', '/settings']
+  const isProtectedPath = protectedPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  // Redirect unauthenticated users trying to access protected routes
   if (
     !user &&
+    isProtectedPath &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.searchParams.set('next', request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
-  */
 
   return supabaseResponse
 }

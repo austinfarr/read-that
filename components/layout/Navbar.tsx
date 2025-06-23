@@ -10,23 +10,40 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { BookOpen, Compass, Menu, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { BookOpen, Compass, Menu, X, LogOut, User, Settings, ChevronDown } from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
 // import { randomUUID } from "crypto";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SearchBar from "../SearchBar";
 import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { useUser } from "@/hooks/useUser";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { authUser, profile, loading } = useUser();
+  const supabase = createClient();
 
   // Close drawer when pathname changes
   useEffect(() => {
     setIsDrawerOpen(false);
   }, [pathname]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   // Hide navbar on search page for fullscreen experience
   if (pathname === "/search") {
@@ -84,16 +101,62 @@ const Navbar = ({}) => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Desktop buttons */}
-          <Button variant="secondary" className="hidden md:block">
-            Login
-          </Button>
-          <Button className="hidden md:block">Get Started</Button>
-
           {/* Desktop theme toggle */}
           <div className="hidden md:block">
             <ThemeToggle />
           </div>
+
+          {/* Desktop buttons */}
+          {loading ? (
+            <div className="hidden md:flex items-center gap-1 p-1">
+              <div className="w-10 h-10 bg-muted-foreground/20 rounded-full animate-pulse" />
+              <div className="w-3 h-3 bg-muted-foreground/20 rounded animate-pulse" />
+            </div>
+          ) : authUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="hidden md:flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-full p-1 transition-colors">
+                  {profile?.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt="Profile" 
+                      className="w-10 h-10 rounded-full object-cover border-2 border-border/20 hover:border-primary/30 transition-all"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-muted border-2 border-border/20 hover:border-primary/30 flex items-center justify-center transition-all">
+                      <User className="w-5 h-5" />
+                    </div>
+                  )}
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login">
+              <Button className="hidden md:block">
+                Login
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile: Search and Menu on the right */}
           <div className="flex md:hidden items-center gap-2">
@@ -151,10 +214,52 @@ const Navbar = ({}) => {
                   </div>
 
                   <div className="pt-4 space-y-2">
-                    <Button variant="secondary" className="w-full">
-                      Login
-                    </Button>
-                    <Button className="w-full">Get Started</Button>
+                    {loading ? (
+                      <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted animate-pulse">
+                        <div className="w-4 h-4 bg-muted-foreground/20 rounded-full" />
+                        <div className="w-24 h-4 bg-muted-foreground/20 rounded" />
+                      </div>
+                    ) : authUser ? (
+                      <>
+                        <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
+                          {profile?.avatar_url ? (
+                            <img 
+                              src={profile.avatar_url} 
+                              alt="Profile" 
+                              className="w-5 h-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-4 h-4" />
+                          )}
+                          <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                        </div>
+                        
+                        <Link href="/profile" className="block">
+                          <Button variant="ghost" className="w-full justify-start">
+                            <User className="w-4 h-4 mr-2" />
+                            Profile
+                          </Button>
+                        </Link>
+                        
+                        <Link href="/settings" className="block">
+                          <Button variant="ghost" className="w-full justify-start">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Settings
+                          </Button>
+                        </Link>
+                        
+                        <Button variant="secondary" className="w-full justify-start" onClick={handleSignOut}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
+                    ) : (
+                      <Link href="/login" className="block">
+                        <Button className="w-full">
+                          Login
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </nav>
               </DrawerContent>

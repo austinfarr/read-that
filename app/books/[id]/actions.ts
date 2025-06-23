@@ -1,8 +1,18 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { SAMPLE_USER_ID } from "@/utils/supabase";
 import { revalidatePath } from "next/cache";
+
+async function getAuthenticatedUserId() {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (error || !user) {
+    throw new Error("User not authenticated");
+  }
+  
+  return user.id;
+}
 
 export async function getReviewStats(hardcoverId: string) {
   const supabase = await createClient();
@@ -37,12 +47,13 @@ export async function submitReview(
   isSpoiler: boolean
 ) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   // First, check if the book exists in user_books
   const { data: existingUserBook } = await supabase
     .from("user_books")
     .select("id, status")
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .eq("hardcover_id", hardcoverId)
     .single();
 
@@ -51,7 +62,7 @@ export async function submitReview(
     const { error: userBookError } = await supabase
       .from("user_books")
       .insert({
-        user_id: SAMPLE_USER_ID,
+        user_id: userId,
         hardcover_id: hardcoverId,
         book_id: bookId,
         status: "finished",
@@ -82,7 +93,7 @@ export async function submitReview(
   const { data, error } = await supabase
     .from("reviews")
     .insert({
-      user_id: SAMPLE_USER_ID,
+      user_id: userId,
       hardcover_id: hardcoverId,
       book_id: bookId,
       rating,
@@ -130,12 +141,13 @@ export async function addToBookshelf(
   status: 'want_to_read' | 'reading' | 'finished'
 ) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   // Check if the book already exists in user_books
   const { data: existingUserBook } = await supabase
     .from("user_books")
     .select("id, status")
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .eq("hardcover_id", hardcoverId)
     .single();
 
@@ -164,7 +176,7 @@ export async function addToBookshelf(
   } else {
     // Create new entry
     const insertData: any = {
-      user_id: SAMPLE_USER_ID,
+      user_id: userId,
       hardcover_id: hardcoverId,
       book_id: bookId,
       status,
@@ -194,11 +206,12 @@ export async function addToBookshelf(
 
 export async function removeFromBookshelf(hardcoverId: string) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   const { error } = await supabase
     .from("user_books")
     .delete()
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .eq("hardcover_id", hardcoverId);
 
   if (error) {
@@ -213,11 +226,12 @@ export async function removeFromBookshelf(hardcoverId: string) {
 
 export async function getUserBookStatus(hardcoverId: string) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   const { data, error } = await supabase
     .from("user_books")
     .select("status")
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .eq("hardcover_id", hardcoverId)
     .single();
 
@@ -231,11 +245,12 @@ export async function getUserBookStatus(hardcoverId: string) {
 
 export async function getUserReview(hardcoverId: string) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   const { data, error } = await supabase
     .from("reviews")
     .select("id, rating, review_text, is_spoiler")
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .eq("hardcover_id", hardcoverId)
     .single();
 
@@ -254,6 +269,7 @@ export async function updateReview(
   isSpoiler: boolean
 ) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   const { data, error } = await supabase
     .from("reviews")
@@ -264,7 +280,7 @@ export async function updateReview(
       updated_at: new Date().toISOString(),
     })
     .eq("id", reviewId)
-    .eq("user_id", SAMPLE_USER_ID) // Security: only allow updating own reviews
+    .eq("user_id", userId) // Security: only allow updating own reviews
     .select("*, hardcover_id")
     .single();
 
@@ -282,13 +298,14 @@ export async function updateReview(
 
 export async function deleteReview(reviewId: string) {
   const supabase = await createClient();
+  const userId = await getAuthenticatedUserId();
 
   // First get the review to get the hardcover_id for revalidation
   const { data: review } = await supabase
     .from("reviews")
     .select("hardcover_id")
     .eq("id", reviewId)
-    .eq("user_id", SAMPLE_USER_ID)
+    .eq("user_id", userId)
     .single();
 
   if (!review) {
@@ -299,7 +316,7 @@ export async function deleteReview(reviewId: string) {
     .from("reviews")
     .delete()
     .eq("id", reviewId)
-    .eq("user_id", SAMPLE_USER_ID); // Security: only allow deleting own reviews
+    .eq("user_id", userId); // Security: only allow deleting own reviews
 
   if (error) {
     console.error("Error deleting review:", error);
