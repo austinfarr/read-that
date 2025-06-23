@@ -10,7 +10,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { BookOpen, Compass, Menu, X, LogOut, User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { BookOpen, Compass, Menu, X, LogOut, User, Settings } from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
@@ -25,7 +32,7 @@ const Navbar = ({}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { authUser, profile } = useUser();
+  const { authUser, profile, loading } = useUser();
   const supabase = createClient();
 
   // Close drawer when pathname changes
@@ -94,24 +101,45 @@ const Navbar = ({}) => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Desktop theme toggle */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
+
           {/* Desktop buttons */}
-          {authUser ? (
-            <>
-              <Button
-                variant="secondary"
-                className="hidden md:flex items-center gap-2"
-                onClick={handleSignOut}
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button>
-              <Link href="/profile">
+          {loading ? (
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted animate-pulse">
+              <div className="w-4 h-4 bg-muted-foreground/20 rounded-full" />
+              <div className="w-16 h-4 bg-muted-foreground/20 rounded" />
+            </div>
+          ) : authUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-pointer">
                   <User className="w-4 h-4" />
                   <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
                 </div>
-              </Link>
-            </>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link href="/login">
@@ -124,11 +152,6 @@ const Navbar = ({}) => {
               </Link>
             </>
           )}
-
-          {/* Desktop theme toggle */}
-          <div className="hidden md:block">
-            <ThemeToggle />
-          </div>
 
           {/* Mobile: Search and Menu on the right */}
           <div className="flex md:hidden items-center gap-2">
@@ -186,15 +209,33 @@ const Navbar = ({}) => {
                   </div>
 
                   <div className="pt-4 space-y-2">
-                    {authUser ? (
+                    {loading ? (
+                      <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted animate-pulse">
+                        <div className="w-4 h-4 bg-muted-foreground/20 rounded-full" />
+                        <div className="w-24 h-4 bg-muted-foreground/20 rounded" />
+                      </div>
+                    ) : authUser ? (
                       <>
+                        <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
+                          <User className="w-4 h-4" />
+                          <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                        </div>
+                        
                         <Link href="/profile" className="block">
-                          <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                            <User className="w-4 h-4" />
-                            <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
-                          </div>
+                          <Button variant="ghost" className="w-full justify-start">
+                            <User className="w-4 h-4 mr-2" />
+                            Profile
+                          </Button>
                         </Link>
-                        <Button variant="secondary" className="w-full" onClick={handleSignOut}>
+                        
+                        <Link href="/settings" className="block">
+                          <Button variant="ghost" className="w-full justify-start">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Settings
+                          </Button>
+                        </Link>
+                        
+                        <Button variant="secondary" className="w-full justify-start" onClick={handleSignOut}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Sign Out
                         </Button>
