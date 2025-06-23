@@ -41,6 +41,30 @@ export function useUser() {
 
     getInitialUser();
 
+    // Force session refresh if we might have just completed OAuth
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const maybeFromOAuth = url.searchParams.has('code') || 
+                            document.referrer.includes('/auth/callback') ||
+                            sessionStorage.getItem('supabase.auth.returned_from_oauth') ||
+                            // Check if this is the my-books page which is often the target of OAuth redirects
+                            (window.location.pathname === '/my-books' && !authUser);
+      
+      if (maybeFromOAuth) {
+        sessionStorage.removeItem('supabase.auth.returned_from_oauth');
+        // Force Supabase to refresh session from cookies
+        setTimeout(async () => {
+          try {
+            await supabase.auth.refreshSession();
+            await getInitialUser();
+          } catch (error) {
+            console.error('Error refreshing session:', error);
+            await getInitialUser();
+          }
+        }, 200);
+      }
+    }
+
     // Also check auth state when page becomes visible (handles OAuth redirects)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
