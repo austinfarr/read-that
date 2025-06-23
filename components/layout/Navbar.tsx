@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, Compass, Menu, X, LogOut, User, Settings } from "lucide-react";
+import { BookOpen, Compass, Menu, X, LogOut, User, Settings, ChevronDown } from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
@@ -108,16 +108,26 @@ const Navbar = ({}) => {
 
           {/* Desktop buttons */}
           {loading ? (
-            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted animate-pulse">
-              <div className="w-4 h-4 bg-muted-foreground/20 rounded-full" />
-              <div className="w-16 h-4 bg-muted-foreground/20 rounded" />
+            <div className="hidden md:flex items-center gap-1 p-1">
+              <div className="w-10 h-10 bg-muted-foreground/20 rounded-full animate-pulse" />
+              <div className="w-3 h-3 bg-muted-foreground/20 rounded animate-pulse" />
             </div>
           ) : authUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-pointer">
-                  <User className="w-4 h-4" />
-                  <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                <div className="hidden md:flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-full p-1 transition-colors">
+                  {profile?.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt="Profile" 
+                      className="w-10 h-10 rounded-full object-cover border-2 border-border/20 hover:border-primary/30 transition-all"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-muted border-2 border-border/20 hover:border-primary/30 flex items-center justify-center transition-all">
+                      <User className="w-5 h-5" />
+                    </div>
+                  )}
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -141,16 +151,11 @@ const Navbar = ({}) => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
-              <Link href="/login">
-                <Button variant="secondary" className="hidden md:block">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button className="hidden md:block">Get Started</Button>
-              </Link>
-            </>
+            <Link href="/login">
+              <Button className="hidden md:block">
+                Login
+              </Button>
+            </Link>
           )}
 
           {/* Mobile: Search and Menu on the right */}
@@ -217,7 +222,15 @@ const Navbar = ({}) => {
                     ) : authUser ? (
                       <>
                         <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
-                          <User className="w-4 h-4" />
+                          {profile?.avatar_url ? (
+                            <img 
+                              src={profile.avatar_url} 
+                              alt="Profile" 
+                              className="w-5 h-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-4 h-4" />
+                          )}
                           <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
                         </div>
                         
@@ -241,16 +254,11 @@ const Navbar = ({}) => {
                         </Button>
                       </>
                     ) : (
-                      <>
-                        <Link href="/login" className="block">
-                          <Button variant="secondary" className="w-full">
-                            Login
-                          </Button>
-                        </Link>
-                        <Link href="/login" className="block">
-                          <Button className="w-full">Get Started</Button>
-                        </Link>
-                      </>
+                      <Link href="/login" className="block">
+                        <Button className="w-full">
+                          Login
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 </nav>
