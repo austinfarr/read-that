@@ -3,6 +3,8 @@ import { BookOpen } from "lucide-react";
 import { BooksLibraryData } from "@/app/my-books/components/BooksLibraryData";
 import { BooksLibraryLoading } from "@/app/my-books/components/BooksLibraryLoading";
 
+export const dynamic = 'force-dynamic';
+
 export default function MyBooksPage() {
   return (
     <div className="min-h-screen pt-24 px-4">
