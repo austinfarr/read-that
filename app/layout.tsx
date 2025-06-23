@@ -2,7 +2,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
+import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import ApolloClientProvider from "@/components/providers/ApolloClientProvider";
 
 const geistSans = Geist({
@@ -37,7 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ApolloClientProvider>
-            <Navbar />
+            <NavbarWrapper />
             {children}
           </ApolloClientProvider>
         </ThemeProvider>
