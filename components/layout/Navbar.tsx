@@ -19,31 +19,14 @@ import { usePathname, useRouter } from "next/navigation";
 import SearchBar from "../SearchBar";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useUser } from "@/hooks/useUser";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { authUser, profile } = useUser();
   const supabase = createClient();
-
-  // Check for authenticated user
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // Close drawer when pathname changes
   useEffect(() => {
@@ -112,7 +95,7 @@ const Navbar = ({}) => {
 
         <div className="flex items-center gap-2">
           {/* Desktop buttons */}
-          {user ? (
+          {authUser ? (
             <>
               <Button
                 variant="secondary"
@@ -122,10 +105,12 @@ const Navbar = ({}) => {
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </Button>
-              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted">
-                <User className="w-4 h-4" />
-                <span className="text-sm">{user.email?.split('@')[0]}</span>
-              </div>
+              <Link href="/profile">
+                <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-pointer">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                </div>
+              </Link>
             </>
           ) : (
             <>
@@ -201,12 +186,14 @@ const Navbar = ({}) => {
                   </div>
 
                   <div className="pt-4 space-y-2">
-                    {user ? (
+                    {authUser ? (
                       <>
-                        <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
-                          <User className="w-4 h-4" />
-                          <span className="text-sm">{user.email?.split('@')[0]}</span>
-                        </div>
+                        <Link href="/profile" className="block">
+                          <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+                            <User className="w-4 h-4" />
+                            <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                          </div>
+                        </Link>
                         <Button variant="secondary" className="w-full" onClick={handleSignOut}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Sign Out

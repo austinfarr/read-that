@@ -1,7 +1,19 @@
 import { Book } from "@/types/book";
 import { getBooksByIds, hardcoverToBook } from "@/utils/hardcover";
-import { SAMPLE_USER_ID, type UserBook } from "@/utils/supabase";
+import { type UserBook } from "@/utils/supabase";
 import { revalidatePath } from "next/cache";
+
+async function getAuthenticatedUserId() {
+  const { createClient } = await import("@/utils/supabase/server");
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (error || !user) {
+    throw new Error("User not authenticated");
+  }
+  
+  return user.id;
+}
 
 export async function fetchUserBooks(): Promise<{
   userBooks: UserBook[];
@@ -12,12 +24,13 @@ export async function fetchUserBooks(): Promise<{
     // Import server client dynamically to avoid edge cases
     const { createClient } = await import("@/utils/supabase/server");
     const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
     // First, fetch user books from Supabase
     const { data, error } = await supabase
       .from("user_books")
       .select("*")
-      .eq("user_id", SAMPLE_USER_ID)
+      .eq("user_id", userId)
       .order("updated_at", { ascending: false });
 
     if (error) throw error;
@@ -28,7 +41,7 @@ export async function fetchUserBooks(): Promise<{
     const { data: reviewsData } = await supabase
       .from("reviews")
       .select("hardcover_id, rating")
-      .eq("user_id", SAMPLE_USER_ID);
+      .eq("user_id", userId);
     
     const ratings: Record<string, number> = {};
     if (reviewsData) {
@@ -67,6 +80,7 @@ export async function updateBookProgress(userBookId: string, currentPage: number
   try {
     const { createClient } = await import("@/utils/supabase/server");
     const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
     const { error } = await supabase
       .from("user_books")
@@ -75,7 +89,7 @@ export async function updateBookProgress(userBookId: string, currentPage: number
         updated_at: new Date().toISOString(),
       })
       .eq("id", userBookId)
-      .eq("user_id", SAMPLE_USER_ID);
+      .eq("user_id", userId);
 
     if (error) throw error;
 
@@ -91,6 +105,7 @@ export async function updateBookStatus(userBookId: string, status: UserBook["sta
   try {
     const { createClient } = await import("@/utils/supabase/server");
     const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
     const updates: Partial<UserBook> = {
       status,
@@ -109,7 +124,7 @@ export async function updateBookStatus(userBookId: string, status: UserBook["sta
       .from("user_books")
       .update(updates)
       .eq("id", userBookId)
-      .eq("user_id", SAMPLE_USER_ID);
+      .eq("user_id", userId);
 
     if (error) throw error;
 
@@ -125,6 +140,7 @@ export async function updateBookNotes(userBookId: string, notes: string) {
   try {
     const { createClient } = await import("@/utils/supabase/server");
     const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
     const { error } = await supabase
       .from("user_books")
@@ -133,7 +149,7 @@ export async function updateBookNotes(userBookId: string, notes: string) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", userBookId)
-      .eq("user_id", SAMPLE_USER_ID);
+      .eq("user_id", userId);
 
     if (error) throw error;
 

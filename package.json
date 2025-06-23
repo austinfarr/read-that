@@ -6,7 +6,8 @@
     "dev": "NODE_OPTIONS='--no-deprecation' next dev --turbopack",
     "build": "NODE_OPTIONS='--no-deprecation' next build",
     "start": "NODE_OPTIONS='--no-deprecation' next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "supabase": "supabase"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -46,6 +47,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
+    "supabase": "^2.26.9",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
