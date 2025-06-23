@@ -10,23 +10,50 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { BookOpen, Compass, Menu, X } from "lucide-react";
+import { BookOpen, Compass, Menu, X, LogOut, User } from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
 // import { randomUUID } from "crypto";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SearchBar from "../SearchBar";
 import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const supabase = createClient();
+
+  // Check for authenticated user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Close drawer when pathname changes
   useEffect(() => {
     setIsDrawerOpen(false);
   }, [pathname]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   // Hide navbar on search page for fullscreen experience
   if (pathname === "/search") {
@@ -85,10 +112,33 @@ const Navbar = ({}) => {
 
         <div className="flex items-center gap-2">
           {/* Desktop buttons */}
-          <Button variant="secondary" className="hidden md:block">
-            Login
-          </Button>
-          <Button className="hidden md:block">Get Started</Button>
+          {user ? (
+            <>
+              <Button
+                variant="secondary"
+                className="hidden md:flex items-center gap-2"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-muted">
+                <User className="w-4 h-4" />
+                <span className="text-sm">{user.email?.split('@')[0]}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="secondary" className="hidden md:block">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button className="hidden md:block">Get Started</Button>
+              </Link>
+            </>
+          )}
 
           {/* Desktop theme toggle */}
           <div className="hidden md:block">
@@ -151,10 +201,29 @@ const Navbar = ({}) => {
                   </div>
 
                   <div className="pt-4 space-y-2">
-                    <Button variant="secondary" className="w-full">
-                      Login
-                    </Button>
-                    <Button className="w-full">Get Started</Button>
+                    {user ? (
+                      <>
+                        <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
+                          <User className="w-4 h-4" />
+                          <span className="text-sm">{user.email?.split('@')[0]}</span>
+                        </div>
+                        <Button variant="secondary" className="w-full" onClick={handleSignOut}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" className="block">
+                          <Button variant="secondary" className="w-full">
+                            Login
+                          </Button>
+                        </Link>
+                        <Link href="/login" className="block">
+                          <Button className="w-full">Get Started</Button>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </nav>
               </DrawerContent>
