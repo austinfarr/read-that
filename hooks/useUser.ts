@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@/types/user";
 import type { User as AuthUser } from "@supabase/supabase-js";
@@ -9,6 +10,7 @@ export function useUser() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
   const supabase = createClient();
 
   useEffect(() => {
@@ -41,14 +43,15 @@ export function useUser() {
 
     getInitialUser();
 
-    // Force session refresh if we might have just completed OAuth
+    // Force session refresh for protected pages that might be OAuth redirect targets
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
+      const isProtectedPage = ['/my-books', '/profile', '/settings'].includes(pathname);
       const maybeFromOAuth = url.searchParams.has('code') || 
                             document.referrer.includes('/auth/callback') ||
                             sessionStorage.getItem('supabase.auth.returned_from_oauth') ||
-                            // Check if this is the my-books page which is often the target of OAuth redirects
-                            (window.location.pathname === '/my-books' && !authUser);
+                            // Force refresh on protected pages if no auth user yet
+                            (isProtectedPage && !authUser);
       
       if (maybeFromOAuth) {
         sessionStorage.removeItem('supabase.auth.returned_from_oauth');
@@ -111,7 +114,7 @@ export function useUser() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, [pathname]);
 
   const updateProfile = async (updates: Partial<User>) => {
     if (!authUser) return { error: new Error("Not authenticated") };
