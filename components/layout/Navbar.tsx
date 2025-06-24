@@ -17,7 +17,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, Compass, Menu, X, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import {
+  BookOpen,
+  Compass,
+  Menu,
+  X,
+  LogOut,
+  User,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 // import ShadcnKit from "@/components/icons/shadcn-kit";
 // import { randomUUID } from "randomUUID";
 import Link from "next/link";
@@ -32,9 +41,11 @@ const Navbar = ({}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { authUser, profile, loading } = useUser();
   const supabase = createClient();
 
+  console.log("user loaded:", authUser, profile);
 
   // Close drawer when pathname changes
   useEffect(() => {
@@ -43,7 +54,7 @@ const Navbar = ({}) => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/');
+    router.push("/");
   };
 
   // Hide navbar on search page for fullscreen experience
@@ -117,11 +128,12 @@ const Navbar = ({}) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="hidden md:flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-full p-1 transition-colors">
-                  {profile?.avatar_url ? (
-                    <img 
-                      src={profile.avatar_url} 
-                      alt="Profile" 
+                  {profile?.avatar_url && !imageError ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Profile"
                       className="w-10 h-10 rounded-full object-cover border-2 border-border/20 hover:border-primary/30 transition-all"
+                      onError={() => setImageError(true)}
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted border-2 border-border/20 hover:border-primary/30 flex items-center justify-center transition-all">
@@ -145,7 +157,10 @@ const Navbar = ({}) => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </DropdownMenuItem>
@@ -153,9 +168,7 @@ const Navbar = ({}) => {
             </DropdownMenu>
           ) : (
             <Link href="/login">
-              <Button className="hidden md:block">
-                Login
-              </Button>
+              <Button className="hidden md:block">Login</Button>
             </Link>
           )}
 
@@ -163,7 +176,11 @@ const Navbar = ({}) => {
           <div className="flex md:hidden items-center gap-2">
             <SearchBar />
 
-            <Drawer direction="right" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <Drawer
+              direction="right"
+              open={isDrawerOpen}
+              onOpenChange={setIsDrawerOpen}
+            >
               <DrawerTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
                   <Menu className="h-6 w-6 scale-110" />
@@ -223,42 +240,55 @@ const Navbar = ({}) => {
                     ) : authUser ? (
                       <>
                         <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
-                          {profile?.avatar_url ? (
-                            <img 
-                              src={profile.avatar_url} 
-                              alt="Profile" 
+                          {profile?.avatar_url && !imageError ? (
+                            <img
+                              src={profile.avatar_url}
+                              alt="Profile"
                               className="w-5 h-5 rounded-full object-cover"
+                              onError={() => setImageError(true)}
                             />
                           ) : (
                             <User className="w-4 h-4" />
                           )}
-                          <span className="text-sm">{profile?.display_name || profile?.username || authUser.email?.split('@')[0]}</span>
+                          <span className="text-sm">
+                            {profile?.display_name ||
+                              profile?.username ||
+                              authUser.email?.split("@")[0]}
+                          </span>
                         </div>
-                        
+
                         <Link href="/profile" className="block">
-                          <Button variant="ghost" className="w-full justify-start">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                          >
                             <User className="w-4 h-4 mr-2" />
                             Profile
                           </Button>
                         </Link>
-                        
+
                         <Link href="/settings" className="block">
-                          <Button variant="ghost" className="w-full justify-start">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                          >
                             <Settings className="w-4 h-4 mr-2" />
                             Settings
                           </Button>
                         </Link>
-                        
-                        <Button variant="secondary" className="w-full justify-start" onClick={handleSignOut}>
+
+                        <Button
+                          variant="secondary"
+                          className="w-full justify-start"
+                          onClick={handleSignOut}
+                        >
                           <LogOut className="w-4 h-4 mr-2" />
                           Sign Out
                         </Button>
                       </>
                     ) : (
                       <Link href="/login" className="block">
-                        <Button className="w-full">
-                          Login
-                        </Button>
+                        <Button className="w-full">Login</Button>
                       </Link>
                     )}
                   </div>
