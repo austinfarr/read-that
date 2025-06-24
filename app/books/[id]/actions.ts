@@ -5,18 +5,21 @@ import { revalidatePath } from "next/cache";
 
 async function getAuthenticatedUserId() {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) {
     throw new Error("User not authenticated");
   }
-  
+
   return user.id;
 }
 
 export async function getReviewStats(hardcoverId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("reviews")
     .select("rating")
@@ -59,15 +62,13 @@ export async function submitReview(
 
   // If the book doesn't exist in user_books, add it as "finished"
   if (!existingUserBook) {
-    const { error: userBookError } = await supabase
-      .from("user_books")
-      .insert({
-        user_id: userId,
-        hardcover_id: hardcoverId,
-        book_id: bookId,
-        status: "finished",
-        finish_date: new Date().toISOString().split('T')[0], // Today's date
-      });
+    const { error: userBookError } = await supabase.from("user_books").insert({
+      user_id: userId,
+      hardcover_id: hardcoverId,
+      book_id: bookId,
+      status: "finished",
+      finish_date: new Date().toISOString().split("T")[0], // Today's date
+    });
 
     if (userBookError) {
       console.error("Error adding book to user_books:", userBookError);
@@ -79,7 +80,7 @@ export async function submitReview(
       .from("user_books")
       .update({
         status: "finished",
-        finish_date: new Date().toISOString().split('T')[0],
+        finish_date: new Date().toISOString().split("T")[0],
       })
       .eq("id", existingUserBook.id);
 
@@ -110,7 +111,7 @@ export async function submitReview(
 
   // Revalidate the book page and my-books page
   revalidatePath(`/books/${hardcoverId}`);
-  revalidatePath('/my-books');
+  revalidatePath("/my-books");
 
   return data;
 }
@@ -120,10 +121,12 @@ export async function fetchReviews(hardcoverId: string) {
 
   const { data, error } = await supabase
     .from("reviews")
-    .select(`
+    .select(
+      `
       *,
       user:users(display_name, avatar_url)
-    `)
+    `
+    )
     .eq("hardcover_id", hardcoverId)
     .order("created_at", { ascending: false });
 
@@ -138,7 +141,7 @@ export async function fetchReviews(hardcoverId: string) {
 export async function addToBookshelf(
   hardcoverId: string,
   bookId: string | undefined,
-  status: 'want_to_read' | 'reading' | 'finished'
+  status: "want_to_read" | "reading" | "finished"
 ) {
   const supabase = await createClient();
   const userId = await getAuthenticatedUserId();
@@ -154,13 +157,13 @@ export async function addToBookshelf(
   if (existingUserBook) {
     // Update existing entry
     const updateData: any = { status };
-    
-    if (status === 'reading' && existingUserBook.status !== 'reading') {
-      updateData.start_date = new Date().toISOString().split('T')[0];
-    } else if (status === 'finished') {
-      updateData.finish_date = new Date().toISOString().split('T')[0];
+
+    if (status === "reading" && existingUserBook.status !== "reading") {
+      updateData.start_date = new Date().toISOString().split("T")[0];
+    } else if (status === "finished") {
+      updateData.finish_date = new Date().toISOString().split("T")[0];
       if (!existingUserBook.start_date) {
-        updateData.start_date = new Date().toISOString().split('T')[0];
+        updateData.start_date = new Date().toISOString().split("T")[0];
       }
     }
 
@@ -182,16 +185,14 @@ export async function addToBookshelf(
       status,
     };
 
-    if (status === 'reading') {
-      insertData.start_date = new Date().toISOString().split('T')[0];
-    } else if (status === 'finished') {
-      insertData.start_date = new Date().toISOString().split('T')[0];
-      insertData.finish_date = new Date().toISOString().split('T')[0];
+    if (status === "reading") {
+      insertData.start_date = new Date().toISOString().split("T")[0];
+    } else if (status === "finished") {
+      insertData.start_date = new Date().toISOString().split("T")[0];
+      insertData.finish_date = new Date().toISOString().split("T")[0];
     }
 
-    const { error } = await supabase
-      .from("user_books")
-      .insert(insertData);
+    const { error } = await supabase.from("user_books").insert(insertData);
 
     if (error) {
       console.error("Error adding book to shelf:", error);
@@ -201,7 +202,7 @@ export async function addToBookshelf(
 
   // Revalidate the book page and my-books page
   revalidatePath(`/books/${hardcoverId}`);
-  revalidatePath('/my-books');
+  revalidatePath("/my-books");
 }
 
 export async function removeFromBookshelf(hardcoverId: string) {
@@ -221,45 +222,55 @@ export async function removeFromBookshelf(hardcoverId: string) {
 
   // Revalidate the book page and my-books page
   revalidatePath(`/books/${hardcoverId}`);
-  revalidatePath('/my-books');
+  revalidatePath("/my-books");
 }
 
 export async function getUserBookStatus(hardcoverId: string) {
-  const supabase = await createClient();
-  const userId = await getAuthenticatedUserId();
+  try {
+    const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
-  const { data, error } = await supabase
-    .from("user_books")
-    .select("status")
-    .eq("user_id", userId)
-    .eq("hardcover_id", hardcoverId)
-    .single();
+    const { data, error } = await supabase
+      .from("user_books")
+      .select("status")
+      .eq("user_id", userId)
+      .eq("hardcover_id", hardcoverId)
+      .single();
 
-  if (error) {
-    // Book not in user's library
+    if (error) {
+      // Book not in user's library
+      return null;
+    }
+
+    return data?.status || null;
+  } catch (error) {
+    // User not authenticated - return null so public users can still view the page
     return null;
   }
-
-  return data?.status || null;
 }
 
 export async function getUserReview(hardcoverId: string) {
-  const supabase = await createClient();
-  const userId = await getAuthenticatedUserId();
+  try {
+    const supabase = await createClient();
+    const userId = await getAuthenticatedUserId();
 
-  const { data, error } = await supabase
-    .from("reviews")
-    .select("id, rating, review_text, is_spoiler")
-    .eq("user_id", userId)
-    .eq("hardcover_id", hardcoverId)
-    .single();
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("id, rating, review_text, is_spoiler")
+      .eq("user_id", userId)
+      .eq("hardcover_id", hardcoverId)
+      .single();
 
-  if (error) {
-    // User hasn't reviewed this book
+    if (error) {
+      // User hasn't reviewed this book
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    // User not authenticated - return null so public users can still view the page
     return null;
   }
-
-  return data;
 }
 
 export async function updateReview(
@@ -291,7 +302,7 @@ export async function updateReview(
 
   // Revalidate the book page and my-books page
   revalidatePath(`/books/${data.hardcover_id}`);
-  revalidatePath('/my-books');
+  revalidatePath("/my-books");
 
   return data;
 }
@@ -325,7 +336,7 @@ export async function deleteReview(reviewId: string) {
 
   // Revalidate the book page and my-books page
   revalidatePath(`/books/${review.hardcover_id}`);
-  revalidatePath('/my-books');
+  revalidatePath("/my-books");
 
   return { success: true };
 }

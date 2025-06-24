@@ -2,6 +2,8 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,13 +43,19 @@ export function BookStatusActions({
   currentStatus, 
   onStatusChange 
 }: BookStatusActionsProps) {
+  const { authUser, loading: authLoading } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [existingReview, setExistingReview] = useState<{ id: string; rating: number; review_text: string | null; is_spoiler: boolean } | null>(null);
   const [isLoadingReview, setIsLoadingReview] = useState(true);
 
-  // Load existing review on component mount
+  // Load existing review on component mount (only if authenticated)
   useEffect(() => {
+    if (!authUser) {
+      setIsLoadingReview(false);
+      return;
+    }
+
     const loadExistingReview = async () => {
       try {
         const review = await getUserReview(hardcoverId);
@@ -60,7 +68,7 @@ export function BookStatusActions({
     };
 
     loadExistingReview();
-  }, [hardcoverId]);
+  }, [hardcoverId, authUser]);
 
   const handleStatusChange = async (status: 'want_to_read' | 'reading' | 'finished') => {
     startTransition(async () => {
@@ -250,6 +258,40 @@ export function BookStatusActions({
       );
     }
   };
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="flex flex-col gap-2 w-full">
+        <Button disabled className="w-full">
+          Loading...
+        </Button>
+        <Button variant="outline" disabled className="w-full">
+          <Star className="w-4 h-4 mr-2" />
+          Loading...
+        </Button>
+      </div>
+    );
+  }
+
+  // Show login prompt for non-authenticated users
+  if (!authUser) {
+    return (
+      <div className="flex flex-col gap-2 w-full">
+        <Link href="/login">
+          <Button className="w-full bg-blue-500 hover:bg-blue-600">
+            Sign in to add to library
+          </Button>
+        </Link>
+        <Link href="/login">
+          <Button variant="outline" className="w-full border-yellow-500/30 hover:border-yellow-500 hover:bg-yellow-500/10">
+            <Star className="w-4 h-4 mr-2" />
+            Sign in to rate
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2 w-full">
