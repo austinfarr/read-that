@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +18,7 @@ import { Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { profile, loading, updateProfile } = useUser();
+  const { profile, loading, updateProfile } = useAuth();
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     username: "",

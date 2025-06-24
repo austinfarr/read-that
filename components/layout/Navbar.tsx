@@ -35,22 +35,28 @@ import { usePathname, useRouter } from "next/navigation";
 import SearchBar from "../SearchBar";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = ({}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { authUser, profile, loading } = useUser();
+  const { authUser, profile, loading } = useAuth();
   const supabase = createClient();
 
-  console.log("user loaded:", authUser, profile);
 
   // Close drawer when pathname changes
   useEffect(() => {
     setIsDrawerOpen(false);
   }, [pathname]);
+
+  // Reset image error when profile changes
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      setImageError(false);
+    }
+  }, [profile?.avatar_url]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -134,6 +140,8 @@ const Navbar = ({}) => {
                       alt="Profile"
                       className="w-10 h-10 rounded-full object-cover border-2 border-border/20 hover:border-primary/30 transition-all"
                       onError={() => setImageError(true)}
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted border-2 border-border/20 hover:border-primary/30 flex items-center justify-center transition-all">
