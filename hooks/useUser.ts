@@ -12,8 +12,15 @@ export function useUser() {
   const supabase = createClient();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     // Get initial auth user
     const getInitialUser = async () => {
+      // Set a timeout to ensure loading doesn't get stuck
+      timeoutId = setTimeout(() => {
+        setLoading(false);
+      }, 5000); // 5 second timeout
+      
       try {
         const { data: { user } } = await supabase.auth.getUser();
         setAuthUser(user);
@@ -26,13 +33,16 @@ export function useUser() {
             .eq('id', user.id)
             .single();
             
-          if (!error && profileData) {
+          if (error) {
+            console.error('Error fetching user profile:', error);
+          } else if (profileData) {
             setProfile(profileData);
           }
         }
       } catch (error) {
         console.error('Error fetching user:', error);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
@@ -60,7 +70,10 @@ export function useUser() {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const updateProfile = async (updates: Partial<User>) => {
