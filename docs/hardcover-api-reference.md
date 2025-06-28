@@ -61,22 +61,33 @@ query GetAuthorById($id: Int!) {
 }
 ```
 
-### Get Books by Author ID
+### Get Unique Books by Author ID
 ```graphql
 query GetBooksByAuthor($authorId: Int!) {
-  books(where: {contributions: {author_id: {_eq: $authorId}}}, limit: 10, order_by: {release_date: desc}) {
+  books(
+    where: {
+      contributions: {author_id: {_eq: $authorId}}, 
+      canonical_id: {_is_null: true}
+    }, 
+    order_by: {users_count: desc}
+  ) {
     id
     title
     subtitle
     description
     pages
     release_date
+    slug
+    users_count
+    editions_count
     image {
       url
     }
   }
 }
 ```
+
+**Key insight**: By filtering `canonical_id: {_is_null: true}`, we get only the canonical/main books and exclude all the alternative editions, translations, and formats. This gives us the same clean list that Hardcover's official site shows.
 
 ### Search for Authors
 ```graphql

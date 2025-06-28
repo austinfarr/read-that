@@ -14,6 +14,8 @@ export interface HardcoverBook extends BaseBook {
   pages?: number;
   release_date?: string;
   slug?: string;
+  users_count?: number;
+  editions_count?: number;
   image?: {
     url: string;
   };

@@ -250,10 +250,16 @@ const GET_AUTHOR_BY_ID_QUERY = `
   }
 `;
 
-// GraphQL query to fetch books by author
+// GraphQL query to fetch unique books by author using canonical relationships
 const GET_BOOKS_BY_AUTHOR_QUERY = `
   query GetBooksByAuthor($authorId: Int!) {
-    books(where: {contributions: {author_id: {_eq: $authorId}}}, order_by: {release_date: desc}) {
+    books(
+      where: {
+        contributions: {author_id: {_eq: $authorId}}, 
+        canonical_id: {_is_null: true}
+      }, 
+      order_by: {users_count: desc}
+    ) {
       id
       title
       subtitle
@@ -261,6 +267,8 @@ const GET_BOOKS_BY_AUTHOR_QUERY = `
       pages
       release_date
       slug
+      users_count
+      editions_count
       image {
         url
       }
@@ -284,7 +292,7 @@ export async function getAuthorById(id: number): Promise<HardcoverAuthor | null>
   }
 }
 
-// Fetch books by a specific author
+// Fetch unique books by a specific author using canonical book relationships
 export async function getBooksByAuthor(authorId: number): Promise<HardcoverBook[]> {
   try {
     const data = await makeHardcoverRequest(GET_BOOKS_BY_AUTHOR_QUERY, { authorId });
