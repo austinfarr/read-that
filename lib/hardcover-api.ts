@@ -59,7 +59,7 @@ async function makeHardcoverRequest(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
+      Authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
       "User-Agent": "ReadThat-App/1.0", // Good practice as mentioned in docs
     },
     body: JSON.stringify({
@@ -215,6 +215,82 @@ export async function searchBooks(
     return [];
   } catch (error) {
     console.error("Search failed:", error);
+    return [];
+  }
+}
+
+// Author-related types
+export interface HardcoverAuthor {
+  id: string;
+  name: string;
+  bio?: string;
+  cached_image?: string;
+  image?: {
+    url: string;
+  };
+  location?: string;
+  books_count?: number;
+  books?: HardcoverBook[];
+}
+
+// GraphQL query to fetch author by ID
+const GET_AUTHOR_BY_ID_QUERY = `
+  query GetAuthorById($id: Int!) {
+    authors(where: {id: {_eq: $id}}) {
+      id
+      name
+      bio
+      cached_image
+      image {
+        url
+      }
+      location
+      books_count
+    }
+  }
+`;
+
+// GraphQL query to fetch books by author
+const GET_BOOKS_BY_AUTHOR_QUERY = `
+  query GetBooksByAuthor($authorId: Int!) {
+    books(where: {contributions: {author_id: {_eq: $authorId}}}, order_by: {release_date: desc}) {
+      id
+      title
+      subtitle
+      description
+      pages
+      release_date
+      slug
+      image {
+        url
+      }
+    }
+  }
+`;
+
+// Fetch a single author by ID
+export async function getAuthorById(id: number): Promise<HardcoverAuthor | null> {
+  try {
+    const data = await makeHardcoverRequest(GET_AUTHOR_BY_ID_QUERY, { id });
+
+    if (!data.authors || data.authors.length === 0) {
+      return null;
+    }
+
+    return data.authors[0] as HardcoverAuthor;
+  } catch (error) {
+    console.error(`Failed to fetch author ${id}:`, error);
+    return null;
+  }
+}
+
+// Fetch books by a specific author
+export async function getBooksByAuthor(authorId: number): Promise<HardcoverBook[]> {
+  try {
+    const data = await makeHardcoverRequest(GET_BOOKS_BY_AUTHOR_QUERY, { authorId });
+    return data.books as HardcoverBook[];
+  } catch (error) {
+    console.error(`Failed to fetch books for author ${authorId}:`, error);
     return [];
   }
 }
