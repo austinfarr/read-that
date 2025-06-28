@@ -10,7 +10,10 @@ import { SearchResults, BookHit } from "@/components/SearchResults";
 
 const SEARCH_BOOKS = gql`
   query SearchBooks($query: String!) {
-    search(query: $query, query_type: "Title", per_page: 5, page: 1) {
+    books: search(query: $query, query_type: "Title", per_page: 5, page: 1) {
+      results
+    }
+    authors: search(query: $query, query_type: "Author", per_page: 5, page: 1) {
       results
     }
   }
@@ -23,7 +26,10 @@ interface SearchResultsData {
 
 // Complete response structure from the GraphQL query
 interface SearchResponse {
-  search: {
+  books: {
+    results: SearchResultsData;
+  };
+  authors: {
     results: SearchResultsData;
   };
 }
@@ -43,8 +49,27 @@ export function SearchBar() {
       onCompleted: (data) => {
         console.log("Search completed:", data);
         setHasSearched(true);
-        if (data && data.search && data.search.results) {
-          setResults(data.search.results.hits);
+        if (data) {
+          // Get both sets of results
+          const bookHits = data.books?.results?.hits || [];
+          const authorHits = data.authors?.results?.hits || [];
+          
+          // Combine and sort by relevance score
+          const allResults = [
+            ...authorHits.map(hit => ({ ...hit, type: 'author' })),
+            ...bookHits.map(hit => ({ ...hit, type: 'book' }))
+          ];
+          
+          // Sort by text_match score (higher is better)
+          allResults.sort((a, b) => {
+            const scoreA = a.text_match || 0;
+            const scoreB = b.text_match || 0;
+            return scoreB - scoreA;
+          });
+          
+          // Take top 5 most relevant results
+          const topResults = allResults.slice(0, 5);
+          setResults(topResults);
         }
       },
     }
