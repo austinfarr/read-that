@@ -4,6 +4,7 @@ import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Calendar, Share2, Sparkles, Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReviewStats, getUserBookStatus } from "./actions";
 
@@ -23,6 +24,7 @@ const GET_BOOK_DETAILS_QUERY = `
       }
       contributions {
         author {
+          id
           name
         }
       }
@@ -171,9 +173,18 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     <div className="flex flex-wrap justify-center lg:justify-start gap-1">
                       {authors.map((author: any, index: number) => (
                         <span key={index}>
-                          <span className="text-teal-600 dark:text-teal-300 font-medium hover:underline cursor-pointer">
-                            {author.name}
-                          </span>
+                          {author.id ? (
+                            <Link
+                              href={`/authors/${author.id}`}
+                              className="text-teal-600 dark:text-teal-300 font-medium hover:underline cursor-pointer transition-colors hover:text-teal-700 dark:hover:text-teal-200"
+                            >
+                              {author.name}
+                            </Link>
+                          ) : (
+                            <span className="text-teal-600 dark:text-teal-300 font-medium">
+                              {author.name}
+                            </span>
+                          )}
                           {index < authors.length - 1 && (
                             <span className="text-muted-foreground">, </span>
                           )}
