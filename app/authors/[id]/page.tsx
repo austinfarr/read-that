@@ -1,4 +1,5 @@
 import { getAuthorById, getBooksByAuthor } from "@/lib/hardcover-api";
+import { AuthorBiography } from "@/components/AuthorBiography";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,9 +7,10 @@ import { notFound } from "next/navigation";
 export default async function AuthorPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const authorId = parseInt(params.id);
+  const { id } = await params;
+  const authorId = parseInt(id);
 
   if (isNaN(authorId)) {
     notFound();
@@ -42,9 +44,9 @@ export default async function AuthorPage({
           <h1 className="text-4xl font-bold mb-4">{author.name}</h1>
 
           {author.bio && (
-            <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-              {author.bio}
-            </p>
+            <div className="mb-4">
+              <AuthorBiography biography={author.bio} />
+            </div>
           )}
 
           {author.location && (
