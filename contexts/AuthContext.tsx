@@ -18,7 +18,6 @@ interface AuthContextType {
   profile: User | null;
   loading: boolean;
   profileLoading: boolean;
-  profileLoading: boolean;
   updateProfile: (updates: Partial<User>) => Promise<{ data: any; error: any }>;
   refreshProfile: () => Promise<void>;
 }
@@ -47,38 +46,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string): Promise<User | null> => {
-      // If there's already a profile fetch in progress, return that promise
-      if (profileFetchPromise.current) {
-        return profileFetchPromise.current;
-      }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      // Create new fetch promise
-      profileFetchPromise.current = (async () => {
-        try {
-          console.log("[Auth] Fetching profile for user:", userId);
-          const { data: profileData, error } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", userId)
-            .single();
+      try {
+        console.log("[Auth] Fetching profile for user:", userId);
+        
+        // Add timeout to the fetch
+        const profilePromise = supabase
+          .from("users")
+          .select("*")
+          .eq("id", userId)
+          .single();
 
-          if (error) {
-            console.error("[Auth] Error fetching user profile:", error);
-            return null;
-          }
+        const { data: profileData, error } = await Promise.race([
+          profilePromise,
+          new Promise<{ data: null, error: Error }>((_, reject) => {
+            controller.signal.addEventListener('abort', () => {
+              reject(new Error('Profile fetch timeout'));
+            });
+          })
+        ]).catch(err => {
+          console.error("[Auth] Profile fetch timeout or error:", err);
+          return { data: null, error: err };
+        });
 
-          console.log("[Auth] Profile fetched successfully");
-          return profileData;
-        } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error) {
           console.error("[Auth] Error fetching user profile:", error);
           return null;
-        } finally {
-          // Clear the promise ref after completion
-          profileFetchPromise.current = null;
         }
-      })();
 
-      return profileFetchPromise.current;
+        console.log("[Auth] Profile fetched successfully:", profileData);
+        return profileData;
+      } catch (error) {
+        console.error("[Auth] Caught error fetching user profile:", error);
+        return null;
+      } finally {
+        clearTimeout(timeoutId);
+      }
     },
     [supabase]
   );
@@ -158,7 +165,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(null);
           }
           setProfileLoading(false);
-          setProfileLoading(false);
         } else {
           console.log("[Auth] No active session");
         }
@@ -191,25 +197,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       switch (event) {
         case "INITIAL_SESSION":
           // Skip - already handled in initializeAuth
+          setLoading(false);
           break;
 
         case "SIGNED_IN":
         case "TOKEN_REFRESHED":
           if (session?.user) {
-            // Only fetch profile if we don't have one or if user ID changed
-            if (!profile || profile.id !== session.user.id) {
-              setProfileLoading(true);
-              const profileData = await fetchProfile(session.user.id);
-              if (mounted && profileData) {
+            setProfileLoading(true);
+            const profileData = await fetchProfile(session.user.id);
+            if (mounted) {
+              if (profileData) {
                 setProfile(profileData);
+              } else {
+                console.warn("[Auth] Could not load profile for signed in user");
+                setProfile(null);
               }
               setProfileLoading(false);
             }
           }
+          setLoading(false);
           break;
 
         case "SIGNED_OUT":
           setProfile(null);
+          setLoading(false);
           break;
 
         case "USER_UPDATED":
@@ -217,6 +228,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (session?.user) {
             await refreshProfile();
           }
+          setLoading(false);
+          break;
+
+        default:
+          setLoading(false);
           break;
       }
     });
