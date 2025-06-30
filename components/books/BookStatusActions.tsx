@@ -263,13 +263,8 @@ export function BookStatusActions({
   if (authLoading) {
     return (
       <div className="flex flex-col gap-2 w-full">
-        <Button disabled className="w-full">
-          Loading...
-        </Button>
-        <Button variant="outline" disabled className="w-full">
-          <Star className="w-4 h-4 mr-2" />
-          Loading...
-        </Button>
+        <div className="h-10 bg-muted animate-pulse rounded-md" />
+        <div className="h-10 bg-muted animate-pulse rounded-md" />
       </div>
     );
   }
