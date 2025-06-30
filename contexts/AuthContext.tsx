@@ -1,9 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@/types/user';
-import type { User as AuthUser } from '@supabase/supabase-js';
+import type { User as AuthUser, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   authUser: AuthUser | null;
@@ -16,83 +16,67 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Profile fetch timeout (5 seconds)
-const PROFILE_FETCH_TIMEOUT = 5000;
-// Max retry attempts
-const MAX_RETRY_ATTEMPTS = 3;
-// Retry delay in ms
-const RETRY_DELAY = 1000;
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [initializing, setInitializing] = useState(true);
+  
+  // Track if we've completed initial setup
+  const hasInitialized = useRef(false);
+  const profileFetchPromise = useRef<Promise<User | null> | null>(null);
   
   // Create supabase client only once
   const supabase = useMemo(() => createClient(), []);
 
-  const fetchProfileWithTimeout = useCallback(async (userId: string, signal: AbortSignal): Promise<User | null> => {
-    try {
-      const { data: profileData, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single()
-        .abortSignal(signal);
+  const fetchProfile = useCallback(async (userId: string): Promise<User | null> => {
+    // If there's already a profile fetch in progress, return that promise
+    if (profileFetchPromise.current) {
+      return profileFetchPromise.current;
+    }
+
+    // Create new fetch promise
+    profileFetchPromise.current = (async () => {
+      try {
+        console.log('[Auth] Fetching profile for user:', userId);
+        const { data: profileData, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+          
+        if (error) {
+          console.error('[Auth] Error fetching user profile:', error);
+          return null;
+        }
         
-      if (error) {
+        console.log('[Auth] Profile fetched successfully');
+        return profileData;
+      } catch (error) {
         console.error('[Auth] Error fetching user profile:', error);
         return null;
+      } finally {
+        // Clear the promise ref after completion
+        profileFetchPromise.current = null;
       }
-      
-      return profileData;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.error('[Auth] Profile fetch timed out');
-      } else {
-        console.error('[Auth] Error fetching user profile:', error);
-      }
-      return null;
-    }
+    })();
+
+    return profileFetchPromise.current;
   }, [supabase]);
-
-  const fetchProfileWithRetry = useCallback(async (userId: string, attemptNumber = 1): Promise<User | null> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PROFILE_FETCH_TIMEOUT);
-
-    try {
-      const profile = await fetchProfileWithTimeout(userId, controller.signal);
-      clearTimeout(timeoutId);
-      
-      if (!profile && attemptNumber < MAX_RETRY_ATTEMPTS) {
-        console.log(`[Auth] Retrying profile fetch (attempt ${attemptNumber + 1}/${MAX_RETRY_ATTEMPTS})`);
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * attemptNumber));
-        return fetchProfileWithRetry(userId, attemptNumber + 1);
-      }
-      
-      return profile;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      console.error('[Auth] Profile fetch failed:', error);
-      return null;
-    }
-  }, [fetchProfileWithTimeout]);
 
   const refreshProfile = useCallback(async () => {
     if (!authUser) return;
     
     setProfileLoading(true);
-    const profileData = await fetchProfileWithRetry(authUser.id);
+    const profileData = await fetchProfile(authUser.id);
     if (profileData) {
       setProfile(profileData);
     }
     setProfileLoading(false);
-  }, [authUser, fetchProfileWithRetry]);
+  }, [authUser, fetchProfile]);
 
   const updateProfile = useCallback(async (updates: Partial<User>) => {
-    if (!authUser) return { error: new Error('Not authenticated') };
+    if (!authUser) return { data: null, error: new Error('Not authenticated') };
     
     const { data, error } = await supabase
       .from('users')
@@ -106,125 +90,119 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     return { data, error };
-  }, [authUser]);
+  }, [authUser, supabase]);
 
   useEffect(() => {
-    let isMounted = true;
-    let authSubscription: any = null;
-    
-    // Get initial session
-    const getInitialSession = async () => {
+    let mounted = true;
+
+    // Initialize auth state
+    const initializeAuth = async () => {
+      // Prevent double initialization
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
+
       try {
-        console.log('[Auth] Getting initial session...');
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('[Auth] Initializing auth state...');
         
-        if (!isMounted) return;
+        // Get the initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (sessionError) {
-          console.error('[Auth] Session error:', sessionError);
-          setAuthUser(null);
-          setProfile(null);
-          setInitializing(false);
+        if (!mounted) return;
+
+        if (error) {
+          console.error('[Auth] Session error:', error);
           setLoading(false);
           return;
         }
-        
-        setAuthUser(session?.user ?? null);
-        
+
         if (session?.user) {
-          console.log('[Auth] User authenticated, fetching profile...');
-          setProfileLoading(true);
-          const profileData = await fetchProfileWithRetry(session.user.id);
+          console.log('[Auth] Found active session');
+          setAuthUser(session.user);
           
-          if (!isMounted) return;
+          // Fetch profile
+          setProfileLoading(true);
+          const profileData = await fetchProfile(session.user.id);
+          
+          if (!mounted) return;
           
           if (profileData) {
-            console.log('[Auth] Profile loaded successfully');
             setProfile(profileData);
-          } else {
-            console.warn('[Auth] Could not load profile after retries');
-            setProfile(null);
           }
           setProfileLoading(false);
         } else {
-          console.log('[Auth] No authenticated user');
-          setProfile(null);
+          console.log('[Auth] No active session');
         }
         
-        setInitializing(false);
         setLoading(false);
       } catch (error) {
-        console.error('[Auth] Error getting initial session:', error);
-        if (isMounted) {
-          setAuthUser(null);
-          setProfile(null);
-          setInitializing(false);
+        console.error('[Auth] Initialization error:', error);
+        if (mounted) {
           setLoading(false);
-          setProfileLoading(false);
         }
       }
     };
 
-    getInitialSession();
+    initializeAuth();
 
-    // Listen for auth changes - only create one listener
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!isMounted) return;
+        if (!mounted) return;
         
         console.log(`[Auth] Auth state changed: ${event}`);
         
-        // Skip if this is the initial session (already handled above)
-        if (event === 'INITIAL_SESSION') {
-          return;
-        }
-        
+        // Update auth user immediately
         setAuthUser(session?.user ?? null);
-        setLoading(true);
         
-        if (session?.user) {
-          setProfileLoading(true);
-          const profileData = await fetchProfileWithRetry(session.user.id);
-          
-          if (!isMounted) return;
-          
-          if (profileData) {
-            setProfile(profileData);
-          } else {
-            console.warn('[Auth] Could not load profile after auth change');
+        // Handle different auth events
+        switch (event) {
+          case 'INITIAL_SESSION':
+            // Skip - already handled in initializeAuth
+            break;
+            
+          case 'SIGNED_IN':
+          case 'TOKEN_REFRESHED':
+            if (session?.user) {
+              // Only fetch profile if we don't have one or if user ID changed
+              if (!profile || profile.id !== session.user.id) {
+                setProfileLoading(true);
+                const profileData = await fetchProfile(session.user.id);
+                if (mounted && profileData) {
+                  setProfile(profileData);
+                }
+                setProfileLoading(false);
+              }
+            }
+            break;
+            
+          case 'SIGNED_OUT':
             setProfile(null);
-          }
-          setProfileLoading(false);
-        } else {
-          setProfile(null);
+            break;
+            
+          case 'USER_UPDATED':
+            // Refresh profile data
+            if (session?.user) {
+              await refreshProfile();
+            }
+            break;
         }
-        
-        if (initializing) {
-          setInitializing(false);
-        }
-        setLoading(false);
       }
     );
-    
-    authSubscription = subscription;
 
     return () => {
-      isMounted = false;
-      if (authSubscription) {
-        authSubscription.unsubscribe();
-      }
+      mounted = false;
+      subscription.unsubscribe();
     };
-  }, [supabase, fetchProfileWithRetry]); // Add necessary dependencies
+  }, [supabase]);
 
   const value = {
     authUser,
     profile,
-    loading: loading || initializing,
+    loading,
     profileLoading,
     updateProfile,
     refreshProfile,
   };
-
 
   return (
     <AuthContext.Provider value={value}>
