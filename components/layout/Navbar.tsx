@@ -42,7 +42,7 @@ const Navbar = ({}) => {
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { authUser, profile, loading } = useAuth();
+  const { authUser, profile, loading, profileLoading } = useAuth();
   const supabase = createClient();
 
 
@@ -134,7 +134,9 @@ const Navbar = ({}) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="hidden md:flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-full p-1 transition-colors">
-                  {profile?.avatar_url && !imageError ? (
+                  {profileLoading ? (
+                    <div className="w-10 h-10 bg-muted-foreground/20 rounded-full animate-pulse" />
+                  ) : profile?.avatar_url && !imageError ? (
                     <img
                       src={profile.avatar_url}
                       alt="Profile"
@@ -248,20 +250,28 @@ const Navbar = ({}) => {
                     ) : authUser ? (
                       <>
                         <div className="flex items-center gap-2 px-4 py-3 mb-2 rounded-lg bg-muted">
-                          {profile?.avatar_url && !imageError ? (
+                          {profileLoading ? (
+                            <div className="w-5 h-5 bg-muted-foreground/20 rounded-full animate-pulse" />
+                          ) : profile?.avatar_url && !imageError ? (
                             <img
                               src={profile.avatar_url}
                               alt="Profile"
                               className="w-5 h-5 rounded-full object-cover"
                               onError={() => setImageError(true)}
+                              referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
                             />
                           ) : (
                             <User className="w-4 h-4" />
                           )}
                           <span className="text-sm">
-                            {profile?.display_name ||
+                            {profileLoading ? (
+                              <div className="w-24 h-4 bg-muted-foreground/20 rounded animate-pulse" />
+                            ) : (
+                              profile?.display_name ||
                               profile?.username ||
-                              authUser.email?.split("@")[0]}
+                              authUser.email?.split("@")[0]
+                            )}
                           </span>
                         </div>
 
