@@ -27,40 +27,42 @@ export default async function AuthorPage({
 
   return (
     <div className="container mx-auto px-4 pt-[100px]">
-      <div className="flex flex-col md:flex-row gap-8 mb-12">
-        {(author.image?.url || author.cached_image) && (
-          <div className="flex-shrink-0">
-            <Image
-              src={author.image?.url || author.cached_image || ""}
-              alt={author.name}
-              width={200}
-              height={200}
-              className="rounded-lg shadow-lg"
-            />
-          </div>
-        )}
-
-        <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-4">{author.name}</h1>
-
-          {author.bio && (
-            <div className="mb-4">
-              <AuthorBiography biography={author.bio} />
+      <div className="max-w-4xl mx-auto mb-12">
+        <div className="flex flex-col md:flex-row gap-8">
+          {(author.image?.url || author.cached_image) && (
+            <div className="flex-shrink-0">
+              <Image
+                src={author.image?.url || author.cached_image || ""}
+                alt={author.name}
+                width={200}
+                height={200}
+                className="rounded-lg shadow-lg"
+              />
             </div>
           )}
 
-          {author.location && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-semibold">Location:</span> {author.location}
-            </p>
-          )}
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold mb-2">{author.name}</h1>
 
-          {author.books_count && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              <span className="font-semibold">Total Books:</span>{" "}
-              {author.books_count}
-            </p>
-          )}
+            {author.bio && (
+              <div className="mb-4 prose prose-lg dark:prose-invert max-w-none">
+                <AuthorBiography biography={author.bio} />
+              </div>
+            )}
+
+            {author.location && (
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                <span className="font-semibold">Location:</span> {author.location}
+              </p>
+            )}
+
+            {author.books_count && (
+              <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                <span className="font-semibold">Total Books:</span>{" "}
+                {author.books_count}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
