@@ -26,7 +26,7 @@ export default async function AuthorPage({
   }
 
   return (
-    <div className="min-h-screen pt-[100px] pb-24">
+    <div className="min-h-screen pt-[120px] pb-24">
       <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
         <div className="mb-4">
           <div className="max-w-4xl mx-auto">
