@@ -55,7 +55,7 @@ export function AuthorBiography({ biography }: AuthorBiographyProps) {
     <div className="relative">
       <div
         ref={contentRef}
-        className={`prose dark:prose-invert max-w-none transition-all duration-300 prose-sm ${
+        className={`transition-all duration-300 ${
           !isExpanded && needsTruncation ? "line-clamp-4 sm:line-clamp-6" : ""
         }`}
         style={{
@@ -77,7 +77,7 @@ export function AuthorBiography({ biography }: AuthorBiographyProps) {
         <div className="mt-3">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-2"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-base font-medium text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-2"
             aria-expanded={isExpanded}
             aria-label={
               isExpanded ? "Show less biography" : "Show more biography"
@@ -86,12 +86,12 @@ export function AuthorBiography({ biography }: AuthorBiographyProps) {
             {isExpanded ? (
               <>
                 Show less
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-4 h-4" />
               </>
             ) : (
               <>
                 Show more
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-4 h-4" />
               </>
             )}
           </button>
