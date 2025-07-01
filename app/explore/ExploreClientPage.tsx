@@ -12,7 +12,7 @@ export default function ExploreClientPage({
   categorizedBooks,
 }: ExploreClientPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-background">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <div className="relative overflow-hidden min-h-[50vh]">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-teal-500/20 dark:from-purple-500/10 dark:via-blue-500/10 dark:to-teal-500/10" />
