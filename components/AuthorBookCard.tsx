@@ -10,7 +10,7 @@ export default function AuthorBookCard({ book }: AuthorBookCardProps) {
   return (
     <Link href={`/books/${book.id}`} className="group">
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform
+        className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transition-transform
   group-hover:scale-105"
       >
         <div className="relative w-full aspect-[2/3]">
@@ -29,8 +29,8 @@ export default function AuthorBookCard({ book }: AuthorBookCardProps) {
           )}
         </div>
 
-        <div className="p-4">
-          <h3 className="font-semibold text-sm line-clamp-2 mb-1">
+        <div className="p-3">
+          <h3 className="font-medium text-sm line-clamp-2 mb-1 leading-tight">
             {book.title}
           </h3>
           {book.release_date && (
