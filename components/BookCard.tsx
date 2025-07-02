@@ -90,16 +90,6 @@ export default function BookCard({
               </div>
             )}
 
-            {/* Action buttons - appear on hover (desktop only) */}
-            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex gap-1 sm:gap-2 opacity-0 md:group-hover:opacity-100 transition-all duration-300 translate-y-2 md:group-hover:translate-y-0 hidden md:flex">
-              <button className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-full flex items-center justify-center text-slate-300 hover:text-red-400 hover:border-red-400/50 transition-all duration-200">
-                <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-              </button>
-              <button className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-full flex items-center justify-center text-slate-300 hover:text-yellow-400 hover:border-yellow-400/50 transition-all duration-200">
-                <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-              </button>
-            </div>
-
             {/* Title and author container - desktop hover only */}
             <div className="absolute inset-x-2 bottom-2 sm:inset-x-3 sm:bottom-3 overflow-hidden rounded-xl backdrop-blur-xl bg-slate-900/90 border border-slate-600/30 opacity-0 transition-all duration-500 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 hidden md:block">
               <div className="p-2 sm:p-3 md:p-4">
