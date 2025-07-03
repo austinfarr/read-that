@@ -1,3 +1,5 @@
+"use server";
+
 import { Book } from "@/types/book";
 import { getBooksByIds, hardcoverToBook } from "@/utils/hardcover";
 import { type UserBook } from "@/utils/supabase";

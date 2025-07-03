@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 export async function getUserByUsername(username: string) {
   const supabase = await createClient();
