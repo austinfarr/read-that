@@ -24,6 +24,7 @@ import {
   X,
   LogOut,
   User,
+  Users,
   Settings,
   ChevronDown,
 } from "lucide-react";
@@ -110,6 +111,21 @@ const Navbar = ({}) => {
             />
             <span className="font-medium">My Books</span>
           </Link>
+          <Link
+            href="/users"
+            className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+              pathname === "/users"
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Users
+              className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                pathname === "/users" ? "text-primary" : ""
+              }`}
+            />
+            <span className="font-medium">Discover</span>
+          </Link>
         </nav>
 
         {/* Desktop: Search in center, buttons on right */}
@@ -153,16 +169,18 @@ const Navbar = ({}) => {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                {profile?.username && (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/users/${profile.username}`} className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      View Profile
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center gap-2">
                     <Settings className="w-4 h-4" />
-                    Settings
+                    Edit Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -233,6 +251,18 @@ const Navbar = ({}) => {
                     <span className="font-medium">My Books</span>
                   </Link>
 
+                  <Link
+                    href="/users"
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      pathname === "/users"
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Users className="w-5 h-5" />
+                    <span className="font-medium">Discover</span>
+                  </Link>
+
                   <div className="pt-4 border-t mt-4">
                     <div className="flex items-center justify-between px-4 py-3">
                       <span className="font-medium">Theme</span>
@@ -274,23 +304,25 @@ const Navbar = ({}) => {
                           </span>
                         </div>
 
+                        {profile?.username && (
+                          <Link href={`/users/${profile.username}`} className="block">
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start"
+                            >
+                              <User className="w-4 h-4 mr-2" />
+                              View Profile
+                            </Button>
+                          </Link>
+                        )}
+
                         <Link href="/profile" className="block">
                           <Button
                             variant="ghost"
                             className="w-full justify-start"
                           >
-                            <User className="w-4 h-4 mr-2" />
-                            Profile
-                          </Button>
-                        </Link>
-
-                        <Link href="/settings" className="block">
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start"
-                          >
                             <Settings className="w-4 h-4 mr-2" />
-                            Settings
+                            Edit Profile
                           </Button>
                         </Link>
 
