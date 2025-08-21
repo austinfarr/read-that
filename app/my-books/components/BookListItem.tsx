@@ -2,52 +2,13 @@ import { type UserBook } from "@/utils/supabase";
 import { Book } from "@/types/book";
 import { Card } from "@/components/ui/card";
 import { BookActions } from "./BookActions";
-import { getStatusLabel, getStatusStyle } from "../utils/bookUtils";
 import {
-  ChevronRight,
   Clock,
-  CheckCircle2,
-  BookOpen,
-  Bookmark,
   Star,
 } from "lucide-react";
 
 import Image from "next/image";
 import Link from "next/link";
-
-const getStatusConfig = (status: UserBook["status"]) => {
-  const configs = {
-    reading: {
-      label: "Reading",
-      icon: BookOpen,
-      className: "bg-blue-500 text-white",
-      dotColor: "bg-blue-500",
-      gradient: "from-blue-500/20 to-blue-600/20",
-    },
-    finished: {
-      label: "Finished",
-      icon: CheckCircle2,
-      className: "bg-emerald-500 text-white",
-      dotColor: "bg-emerald-500",
-    },
-    want_to_read: {
-      label: "Want to Read",
-      icon: Bookmark,
-      className: "bg-indigo-500 text-white",
-      dotColor: "bg-amber-500",
-      gradient: "from-amber-500/20 to-amber-600/20",
-    },
-    dnf: {
-      label: "DNF",
-      icon: Clock,
-      className: "bg-gray-500/10 text-gray-600 border-gray-200",
-      dotColor: "bg-gray-500",
-      gradient: "from-gray-500/20 to-gray-600/20",
-    },
-  };
-
-  return configs[status] || configs.want_to_read;
-};
 
 interface BookListItemProps {
   userBook: UserBook;
@@ -56,8 +17,6 @@ interface BookListItemProps {
 }
 
 export function BookListItem({ userBook, book, rating }: BookListItemProps) {
-  const statusConfig = getStatusConfig(userBook.status);
-  const StatusIcon = statusConfig.icon;
   const progressPercentage =
     book.pageCount && userBook.current_page
       ? Math.min(100, (userBook.current_page / book.pageCount) * 100)
@@ -147,16 +106,7 @@ export function BookListItem({ userBook, book, rating }: BookListItemProps) {
             </div>
           </div>
           <div className="flex-shrink-0">
-            {/* <BookActions userBook={userBook} bookPageCount={book.pageCount} /> */}
-            <div
-              className={`
-                inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-                ${statusConfig.className}
-              `}
-            >
-              <StatusIcon className="w-3.5 h-3.5" />
-              <span>{statusConfig.label}</span>
-            </div>{" "}
+            <BookActions userBook={userBook} bookPageCount={book.pageCount} />
           </div>
         </div>
       </Card>

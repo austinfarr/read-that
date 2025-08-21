@@ -7,6 +7,62 @@ import {
   updateBookNotes,
 } from "@/app/my-books/actions";
 import { type UserBook } from "@/utils/supabase";
+import {
+  BookOpen,
+  CheckCircle2,
+  Bookmark,
+  Clock,
+  ChevronDown, 
+  MoreVertical, 
+  PenSquare, 
+  FileText
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const getStatusConfig = (status: UserBook["status"]) => {
+  const configs = {
+    reading: {
+      label: "Reading",
+      icon: BookOpen,
+      className: "bg-blue-500 text-white",
+      dotColor: "bg-blue-500",
+      gradient: "from-blue-500/20 to-blue-600/20",
+    },
+    finished: {
+      label: "Finished",
+      icon: CheckCircle2,
+      className: "bg-emerald-500 text-white",
+      dotColor: "bg-emerald-500",
+    },
+    want_to_read: {
+      label: "Want to Read",
+      icon: Bookmark,
+      className: "bg-indigo-500 text-white",
+      dotColor: "bg-amber-500",
+      gradient: "from-amber-500/20 to-amber-600/20",
+    },
+    dnf: {
+      label: "DNF",
+      icon: Clock,
+      className: "bg-gray-500/10 text-gray-600 border-gray-200",
+      dotColor: "bg-gray-500",
+      gradient: "from-gray-500/20 to-gray-600/20",
+    },
+  };
+
+  return configs[status] || configs.want_to_read;
+};
 
 interface BookActionsProps {
   userBook: UserBook;
@@ -23,6 +79,9 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
   );
   const [notesValue, setNotesValue] = useState(userBook.notes || "");
 
+  const statusConfig = getStatusConfig(userBook.status);
+  const StatusIcon = statusConfig.icon;
+
   const handleUpdateProgress = async () => {
     const page = parseInt(progressValue);
     if (isNaN(page) || page < 0) return;
@@ -36,15 +95,9 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
     }
   };
 
-  const handleMarkFinished = async () => {
+  const handleUpdateStatus = async (newStatus: UserBook["status"]) => {
     setIsUpdatingStatus(true);
-    const result = await updateBookStatus(userBook.id, "finished");
-    setIsUpdatingStatus(false);
-  };
-
-  const handleStartReading = async () => {
-    setIsUpdatingStatus(true);
-    const result = await updateBookStatus(userBook.id, "reading");
+    const result = await updateBookStatus(userBook.id, newStatus);
     setIsUpdatingStatus(false);
   };
 
@@ -55,125 +108,158 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
     }
   };
 
-  if (userBook.status === "reading") {
-    return (
-      <>
-        <div className="flex flex-col gap-2">
+  return (
+    <div className="flex items-center gap-2">
+      {/* Status Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
-            onClick={() => setShowProgressDialog(true)}
-            className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Update Progress
-          </button>
-          <button
-            onClick={() => setShowNotesDialog(true)}
-            className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-          >
-            Add Notes
-          </button>
-          <button
-            onClick={handleMarkFinished}
+            className={`
+              inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+              transition-colors hover:opacity-90
+              ${statusConfig.className}
+            `}
             disabled={isUpdatingStatus}
-            className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
           >
-            {isUpdatingStatus ? "..." : "Mark Finished"}
+            <StatusIcon className="w-3.5 h-3.5" />
+            <span>{statusConfig.label}</span>
+            <ChevronDown className="w-3 h-3 ml-0.5" />
           </button>
-        </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem 
+            onClick={() => handleUpdateStatus("want_to_read")}
+            disabled={userBook.status === "want_to_read"}
+          >
+            <Bookmark className="w-4 h-4 mr-2" />
+            Want to Read
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleUpdateStatus("reading")}
+            disabled={userBook.status === "reading"}
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Currently Reading
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleUpdateStatus("finished")}
+            disabled={userBook.status === "finished"}
+          >
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Finished
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleUpdateStatus("dnf")}
+            disabled={userBook.status === "dnf"}
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Did Not Finish
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        {/* Progress Dialog */}
-        {showProgressDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-background rounded-lg p-6 w-80">
-              <h3 className="font-semibold mb-4">Update Reading Progress</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Current Page
-                  </label>
-                  <input
-                    type="number"
-                    value={progressValue}
-                    onChange={(e) => setProgressValue(e.target.value)}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
-                    min="0"
-                    max={bookPageCount || undefined}
-                  />
-                  {bookPageCount && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Total pages: {bookPageCount}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleUpdateProgress}
-                    disabled={isUpdatingProgress}
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    {isUpdatingProgress ? "Updating..." : "Update"}
-                  </button>
-                  <button
-                    onClick={() => setShowProgressDialog(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+      {/* Actions Menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+            <MoreVertical className="w-4 h-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {userBook.status === "reading" && (
+            <>
+              <DropdownMenuItem onClick={() => setShowProgressDialog(true)}>
+                <PenSquare className="w-4 h-4 mr-2" />
+                Update Progress
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem onClick={() => setShowNotesDialog(true)}>
+            <FileText className="w-4 h-4 mr-2" />
+            {userBook.notes ? "Edit Notes" : "Add Notes"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Progress Dialog */}
+      <Dialog open={showProgressDialog} onOpenChange={setShowProgressDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Reading Progress</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="progress">Current Page</Label>
+              <Input
+                id="progress"
+                type="number"
+                value={progressValue}
+                onChange={(e) => setProgressValue(e.target.value)}
+                min="0"
+                max={bookPageCount || undefined}
+              />
+              {bookPageCount && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total pages: {bookPageCount}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleUpdateProgress}
+                disabled={isUpdatingProgress}
+                className="flex-1"
+              >
+                {isUpdatingProgress ? "Updating..." : "Update"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowProgressDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
             </div>
           </div>
-        )}
+        </DialogContent>
+      </Dialog>
 
-        {/* Notes Dialog */}
-        {showNotesDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-background rounded-lg p-6 w-96">
-              <h3 className="font-semibold mb-4">Add Notes</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Notes
-                  </label>
-                  <textarea
-                    value={notesValue}
-                    onChange={(e) => setNotesValue(e.target.value)}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary h-32 resize-none"
-                    placeholder="Add your thoughts about this book..."
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleUpdateNotes}
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Save Notes
-                  </button>
-                  <button
-                    onClick={() => setShowNotesDialog(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+      {/* Notes Dialog */}
+      <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{userBook.notes ? "Edit Notes" : "Add Notes"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                className="h-32 resize-none"
+                placeholder="Add your thoughts about this book..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleUpdateNotes}
+                className="flex-1"
+              >
+                Save Notes
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowNotesDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
             </div>
           </div>
-        )}
-      </>
-    );
-  }
-
-  if (userBook.status === "want_to_read") {
-    return (
-      <button
-        onClick={handleStartReading}
-        disabled={isUpdatingStatus}
-        className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-      >
-        {isUpdatingStatus ? "Starting..." : "Start Reading"}
-      </button>
-    );
-  }
-
-  return null;
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
