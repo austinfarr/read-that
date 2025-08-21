@@ -105,7 +105,7 @@ export function BookListItem({ userBook, book, rating }: BookListItemProps) {
               </div>
             </div>
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0" onClick={(e) => e.preventDefault()}>
             <BookActions userBook={userBook} bookPageCount={book.pageCount} />
           </div>
         </div>
