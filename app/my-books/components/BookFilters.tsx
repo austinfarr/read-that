@@ -1,7 +1,14 @@
 import { FilterType } from "../utils/bookUtils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, CheckCircle2, Heart, Library, Filter } from "lucide-react";
+import {
+  BookOpen,
+  Clock,
+  CheckCircle2,
+  Heart,
+  Library,
+  Filter,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,7 +72,7 @@ export function BookFilters({
     },
   ];
 
-  const activeFilterConfig = filters.find(f => f.key === activeFilter);
+  const activeFilterConfig = filters.find((f) => f.key === activeFilter);
 
   return (
     <>
@@ -78,12 +85,12 @@ export function BookFilters({
                 {activeFilterConfig?.icon}
                 <span className="font-medium">{activeFilterConfig?.label}</span>
               </span>
-              <Badge variant="secondary" className="ml-2">
-                {activeFilterConfig?.count}
-              </Badge>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+          <DropdownMenuContent
+            align="start"
+            className="w-[var(--radix-dropdown-menu-trigger-width)]"
+          >
             {filters.map((filter) => (
               <DropdownMenuItem
                 key={filter.key}
@@ -95,9 +102,6 @@ export function BookFilters({
                     {filter.icon}
                     <span>{filter.label}</span>
                   </span>
-                  <Badge variant={activeFilter === filter.key ? "default" : "secondary"}>
-                    {filter.count}
-                  </Badge>
                 </span>
               </DropdownMenuItem>
             ))}
@@ -124,12 +128,6 @@ export function BookFilters({
                   {filter.icon}
                   <span className="font-medium">{filter.label}</span>
                 </span>
-                <Badge 
-                  variant={activeFilter === filter.key ? "default" : "secondary"}
-                  className="ml-2 h-5 px-1.5 min-w-[1.25rem] justify-center"
-                >
-                  {filter.count}
-                </Badge>
               </TabsTrigger>
             ))}
           </TabsList>
