@@ -81,61 +81,82 @@ export function BookListItem({ userBook, book, rating }: BookListItemProps) {
                 {book.title}
               </h3>
             </div>
+
             <p className="text-muted-foreground text-sm mb-2 sm:text-base">
               {book.author}
             </p>
 
-            <div className="space-y-2">
-              {/* Progress for currently reading books */}
+            <div className="space-y-3">
+              {/* Enhanced Progress for currently reading books */}
               {userBook.status === "reading" && (
-                <>
-                  <div className="text-sm text-muted-foreground">
-                    Progress: {userBook.current_page || 0} /{" "}
-                    {book.pageCount || "Unknown"} pages
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 font-medium">
+                      Reading Progress
+                    </span>
+                    <span className="text-blue-600 font-semibold">
+                      {progressPercentage.toFixed(0)}%
+                    </span>
                   </div>
-                  {book.pageCount && userBook.current_page && (
-                    <div className="w-full bg-muted rounded-full h-2">
+                  <div className="relative">
+                    <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            (userBook.current_page / book.pageCount) * 100
-                          )}%`,
-                        }}
-                      />
+                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out relative"
+                        style={{ width: `${progressPercentage}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                      </div>
                     </div>
-                  )}
-                </>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {userBook.current_page || 0} of {book.pageCount || "?"}{" "}
+                    pages
+                  </div>
+                </div>
               )}
 
-              {/* Rating for finished books */}
+              {/* Enhanced Rating for finished books */}
               {userBook.status === "finished" && rating && (
-                <div className="text-sm text-muted-foreground">
-                  ⭐ Rating: {rating}/10
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-50 rounded-lg">
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {rating}/10
+                  </span>
                 </div>
               )}
 
-              {/* Notes */}
+              {/* Notes with better styling */}
               {userBook.notes && (
-                <div className="text-sm text-muted-foreground line-clamp-2">
-                  Notes: {userBook.notes}
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <div className="text-xs font-medium text-gray-500 mb-1">
+                    Notes
+                  </div>
+                  <div className="text-sm text-gray-700 line-clamp-2">
+                    {userBook.notes}
+                  </div>
                 </div>
               )}
 
-              <div
-                className={`
-                inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-                ${statusConfig.className}
-              `}
-              >
-                <StatusIcon className="w-3.5 h-3.5" />
-                <span>{statusConfig.label}</span>
+              {/* Enhanced timestamp */}
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Clock className="w-3 h-3" />
+                <span>
+                  Updated {new Date(userBook.updated_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
           <div className="flex-shrink-0">
-            <BookActions userBook={userBook} bookPageCount={book.pageCount} />
+            {/* <BookActions userBook={userBook} bookPageCount={book.pageCount} /> */}
+            <div
+              className={`
+                inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                ${statusConfig.className}
+              `}
+            >
+              <StatusIcon className="w-3.5 h-3.5" />
+              <span>{statusConfig.label}</span>
+            </div>{" "}
           </div>
         </div>
       </Card>

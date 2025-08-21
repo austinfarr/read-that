@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { updateBookProgress, updateBookStatus, updateBookNotes } from "@/app/my-books/actions";
+import {
+  updateBookProgress,
+  updateBookStatus,
+  updateBookNotes,
+} from "@/app/my-books/actions";
 import { type UserBook } from "@/utils/supabase";
 
 interface BookActionsProps {
@@ -14,7 +18,9 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
-  const [progressValue, setProgressValue] = useState(userBook.current_page?.toString() || "");
+  const [progressValue, setProgressValue] = useState(
+    userBook.current_page?.toString() || ""
+  );
   const [notesValue, setNotesValue] = useState(userBook.notes || "");
 
   const handleUpdateProgress = async () => {
@@ -24,7 +30,7 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
     setIsUpdatingProgress(true);
     const result = await updateBookProgress(userBook.id, page);
     setIsUpdatingProgress(false);
-    
+
     if (result.success) {
       setShowProgressDialog(false);
     }
@@ -81,7 +87,9 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
               <h3 className="font-semibold mb-4">Update Reading Progress</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Current Page</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Current Page
+                  </label>
                   <input
                     type="number"
                     value={progressValue}
@@ -123,7 +131,9 @@ export function BookActions({ userBook, bookPageCount }: BookActionsProps) {
               <h3 className="font-semibold mb-4">Add Notes</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Notes</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Notes
+                  </label>
                   <textarea
                     value={notesValue}
                     onChange={(e) => setNotesValue(e.target.value)}
