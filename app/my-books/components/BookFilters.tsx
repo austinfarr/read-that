@@ -65,12 +65,13 @@ export function BookFilters({
         onValueChange={(value) => onFilterChange(value as FilterType)}
         className="w-auto"
       >
-        <TabsList className="h-auto p-2 bg-muted/50 backdrop-blur-sm">
+        <TabsList className="h-auto p-2 rounded-full bg-muted/50 backdrop-blur-sm">
           {filters.map((filter) => (
             <TabsTrigger
               key={filter.key}
               value={filter.key}
-              className="relative gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="relative gap-2 px-4 py-2 rounded-full border border-transparent data-[state=active]:bg-background 
+              data-[state=active]:shadow-sm"
             >
               <span className="flex items-center gap-2">
                 {filter.icon}
