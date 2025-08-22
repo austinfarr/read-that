@@ -1,5 +1,5 @@
 "use client";
-import { CategorizedBooks } from "@/lib/hardcover-api";
+import { ExploreLists } from "@/lib/hardcover-api";
 import React from "react";
 import ScrollableBookSection from "@/components/ScrollableBookSection";
 import { 
@@ -7,21 +7,49 @@ import {
   BookOpen, 
   Star, 
   TrendingUp, 
-  Flame,
-  Clock,
-  Heart,
-  Search,
-  BookMarked,
-  Briefcase
+  Award,
+  Telescope,
+  Zap,
+  Users,
+  Trophy,
+  Heart
 } from "lucide-react";
 
 interface ExploreClientPageProps {
-  categorizedBooks: CategorizedBooks;
+  exploreLists: ExploreLists;
 }
 
+// Map categories to icons
+const getCategoryIcon = (listName: string) => {
+  const name = listName.toLowerCase();
+  
+  if (name.includes('award') || name.includes('prize') || name.includes('hugo') || name.includes('pulitzer')) {
+    return <Award className="w-5 h-5 text-yellow-500" />;
+  }
+  if (name.includes('sci-fi') || name.includes('science fiction') || name.includes('science')) {
+    return <Telescope className="w-5 h-5 text-blue-500" />;
+  }
+  if (name.includes('fantasy')) {
+    return <Sparkles className="w-5 h-5 text-purple-500" />;
+  }
+  if (name.includes('tiktok') || name.includes('trending')) {
+    return <TrendingUp className="w-5 h-5 text-pink-500" />;
+  }
+  if (name.includes('times') || name.includes('npr') || name.includes('esquire')) {
+    return <Star className="w-5 h-5 text-orange-500" />;
+  }
+  if (name.includes('creative') || name.includes('potential')) {
+    return <Zap className="w-5 h-5 text-green-500" />;
+  }
+  
+  return <BookOpen className="w-5 h-5 text-teal-500" />;
+};
+
 export default function ExploreClientPage({
-  categorizedBooks,
+  exploreLists,
 }: ExploreClientPageProps) {
+  const { lists } = exploreLists;
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -37,37 +65,37 @@ export default function ExploreClientPage({
         <div className="container mx-auto pt-44 pb-12 px-4 relative">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
+              <Users className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
               <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground via-blue-600 to-teal-600 dark:from-white dark:via-blue-100 dark:to-teal-200 bg-clip-text text-transparent">
-                Discover Your Next
+                Community Curated
               </h1>
-              <Sparkles className="w-8 h-8 text-purple-500 dark:text-purple-400 ml-3 animate-pulse" />
+              <Trophy className="w-8 h-8 text-purple-500 dark:text-purple-400 ml-3 animate-pulse" />
             </div>
             <h2 className="text-5xl font-bold bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500 dark:from-teal-400 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-6">
-              Great Read
+              Book Collections
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Explore trending titles, highest-rated books, and curated collections
+              Discover expertly curated book lists from
               <span className="text-teal-600 dark:text-teal-300 font-medium">
                 {" "}
-                updated daily{" "}
+                NPR, The New York Times, Esquire{" "}
               </span>
-              from the Hardcover community
+              and passionate readers in the Hardcover community
             </p>
 
             {/* Stats */}
             <div className="flex items-center justify-center gap-8 mt-8">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <BookOpen className="w-5 h-5 text-teal-500 dark:text-teal-400" />
-                <span className="text-lg font-medium">1000+ Books</span>
+                <span className="text-lg font-medium">{lists.length} Curated Lists</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Star className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
-                <span className="text-lg font-medium">Community Rated</span>
+                <Heart className="w-5 h-5 text-red-500 dark:text-red-400" />
+                <span className="text-lg font-medium">Community Loved</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <TrendingUp className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                <span className="text-lg font-medium">Live Updates</span>
+                <Award className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                <span className="text-lg font-medium">Award Winners</span>
               </div>
             </div>
           </div>
@@ -76,94 +104,32 @@ export default function ExploreClientPage({
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-16 mt-4">
-        {/* Dynamic sections first */}
-        {categorizedBooks.trending && categorizedBooks.trending.length > 0 && (
-          <ScrollableBookSection
-            title="Trending Now"
-            books={categorizedBooks.trending}
-            icon={<Flame className="w-5 h-5 text-orange-500" />}
-            description="Most popular books in the community right now"
-          />
-        )}
-
-        {categorizedBooks.highestRated && categorizedBooks.highestRated.length > 0 && (
-          <ScrollableBookSection
-            title="Highest Rated"
-            books={categorizedBooks.highestRated}
-            icon={<Star className="w-5 h-5 text-yellow-500" />}
-            description="Top-rated books by thousands of readers"
-          />
-        )}
-
-        {categorizedBooks.newReleases && categorizedBooks.newReleases.length > 0 && (
-          <ScrollableBookSection
-            title="New Releases"
-            books={categorizedBooks.newReleases}
-            icon={<Clock className="w-5 h-5 text-green-500" />}
-            description="Fresh titles from the past two years"
-          />
-        )}
-
-        {/* Genre sections */}
-        {categorizedBooks.sciFiFantasy && categorizedBooks.sciFiFantasy.length > 0 && (
-          <ScrollableBookSection
-            title="Science Fiction & Fantasy"
-            books={categorizedBooks.sciFiFantasy}
-            icon={<Sparkles className="w-5 h-5 text-purple-500" />}
-            description="Epic adventures and imagined worlds"
-          />
-        )}
-
-        {categorizedBooks.mystery && categorizedBooks.mystery.length > 0 && (
-          <ScrollableBookSection
-            title="Mystery & Thriller"
-            books={categorizedBooks.mystery}
-            icon={<Search className="w-5 h-5 text-gray-500" />}
-            description="Page-turning mysteries and suspense"
-          />
-        )}
-
-        {categorizedBooks.romance && categorizedBooks.romance.length > 0 && (
-          <ScrollableBookSection
-            title="Romance"
-            books={categorizedBooks.romance}
-            icon={<Heart className="w-5 h-5 text-pink-500" />}
-            description="Love stories that capture the heart"
-          />
-        )}
-
-        {categorizedBooks.nonFiction && categorizedBooks.nonFiction.length > 0 && (
-          <ScrollableBookSection
-            title="Non-Fiction"
-            books={categorizedBooks.nonFiction}
-            icon={<Briefcase className="w-5 h-5 text-blue-500" />}
-            description="Ideas and insights from the real world"
-          />
-        )}
-
-        {categorizedBooks.classics && categorizedBooks.classics.length > 0 && (
-          <ScrollableBookSection
-            title="Timeless Classics"
-            books={categorizedBooks.classics}
-            icon={<BookMarked className="w-5 h-5 text-amber-600" />}
-            description="Literature that stands the test of time"
-          />
-        )}
+        {lists.map((list) => (
+          list.books && list.books.length > 0 && (
+            <ScrollableBookSection
+              key={list.id}
+              title={list.name}
+              books={list.books}
+              icon={getCategoryIcon(list.name)}
+              description={list.description}
+            />
+          )
+        ))}
 
         {/* Footer CTA */}
         <div className="text-center py-16 mt-8">
           <div className="bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl p-8 mx-auto max-w-2xl border border-border/20">
-            <TrendingUp className="w-12 h-12 text-teal-500 dark:text-teal-400 mx-auto mb-4 animate-pulse" />
+            <Users className="w-12 h-12 text-teal-500 dark:text-teal-400 mx-auto mb-4 animate-pulse" />
             <h3 className="text-2xl font-bold text-foreground mb-4">
-              Fresh Recommendations Daily
+              Powered by the Community
             </h3>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Our collections update automatically based on what the 
+              These collections are created and curated by 
               <span className="text-teal-600 dark:text-teal-300 font-medium">
                 {" "}
-                Hardcover community{" "}
+                real readers, critics, and publications{" "}
               </span>
-              is reading and loving. Check back tomorrow for new discoveries!
+              who know great books. Each list tells a story and offers a unique journey through literature.
             </p>
           </div>
         </div>
