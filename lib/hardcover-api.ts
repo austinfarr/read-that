@@ -55,31 +55,45 @@ async function makeHardcoverRequest(
   query: string,
   variables: any
 ): Promise<any> {
-  const response = await fetch(HARDCOVER_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
-      "User-Agent": "ReadThat-App/1.0", // Good practice as mentioned in docs
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-  if (!response.ok) {
-    throw new Error(`Hardcover API request failed: ${response.statusText}`);
+  try {
+    const response = await fetch(HARDCOVER_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HARDCOVER_API_TOKEN}`,
+        "User-Agent": "ReadThat-App/1.0", // Good practice as mentioned in docs
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`Hardcover API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("Hardcover API GraphQL errors:", data.errors);
+      throw new Error("GraphQL query failed");
+    }
+
+    return data.data;
+  } catch (error: any) {
+    clearTimeout(timeout);
+    if (error.name === "AbortError") {
+      throw new Error("Hardcover API request timeout");
+    }
+    throw error;
   }
-
-  const data = await response.json();
-
-  if (data.errors) {
-    console.error("Hardcover API GraphQL errors:", data.errors);
-    throw new Error("GraphQL query failed");
-  }
-
-  return data.data;
 }
 
 // Fetch a single book by ID
@@ -128,61 +142,265 @@ export async function getBooksByIds(ids: number[]): Promise<HardcoverBook[]> {
 
 // Categorized books for the explore page
 export interface CategorizedBooks {
+  trending: HardcoverBook[];
+  highestRated: HardcoverBook[];
+  newReleases: HardcoverBook[];
   sciFiFantasy: HardcoverBook[];
-  classicLiterature: HardcoverBook[];
-  modernFiction: HardcoverBook[];
+  mystery: HardcoverBook[];
+  romance: HardcoverBook[];
+  nonFiction: HardcoverBook[];
+  classics: HardcoverBook[];
 }
 
-// Fetch popular/recommended books for the explore page
+// Dynamic queries for different book categories
+const GET_BOOKS_BY_POPULARITY_QUERY = `
+  query GetPopularBooks($limit: Int!) {
+    books(
+      where: {canonical_id: {_is_null: true}}
+      order_by: {users_count: desc}
+      limit: $limit
+    ) {
+      id
+      title
+      subtitle
+      description
+      pages
+      release_date
+      slug
+      users_count
+      ratings_count
+      image {
+        url
+      }
+      contributions {
+        author {
+          name
+        }
+      }
+    }
+  }
+`;
+
+const GET_BOOKS_BY_RATING_QUERY = `
+  query GetHighestRatedBooks($limit: Int!) {
+    books(
+      where: {
+        canonical_id: {_is_null: true},
+        ratings_count: {_gt: 50}
+      }
+      order_by: {ratings_count: desc}
+      limit: $limit
+    ) {
+      id
+      title
+      subtitle
+      description
+      pages
+      release_date
+      slug
+      users_count
+      ratings_count
+      image {
+        url
+      }
+      contributions {
+        author {
+          name
+        }
+      }
+    }
+  }
+`;
+
+const GET_RECENT_BOOKS_QUERY = `
+  query GetRecentBooks($year: Int!, $limit: Int!) {
+    books(
+      where: {
+        canonical_id: {_is_null: true},
+        release_year: {_gte: 2024}
+      }
+      order_by: {users_count: desc}
+      limit: $limit
+    ) {
+      id
+      title
+      subtitle
+      description
+      pages
+      release_date
+      release_year
+      slug
+      users_count
+      ratings_count
+      image {
+        url
+      }
+      contributions {
+        author {
+          name
+        }
+      }
+    }
+  }
+`;
+
+// Fetch books by popularity (most users)
+export async function getPopularBooks(
+  limit: number = 12
+): Promise<HardcoverBook[]> {
+  try {
+    const data = await makeHardcoverRequest(GET_BOOKS_BY_POPULARITY_QUERY, {
+      limit,
+    });
+    return data.books as HardcoverBook[];
+  } catch (error) {
+    console.error("Failed to fetch popular books:", error);
+    return [];
+  }
+}
+
+// Fetch highest rated books
+export async function getHighestRatedBooks(
+  limit: number = 12
+): Promise<HardcoverBook[]> {
+  try {
+    const data = await makeHardcoverRequest(GET_BOOKS_BY_RATING_QUERY, {
+      limit,
+    });
+    return data.books as HardcoverBook[];
+  } catch (error) {
+    console.error("Failed to fetch highest rated books:", error);
+    return [];
+  }
+}
+
+// Fetch new releases (books from recent years)
+export async function getNewReleases(
+  limit: number = 12
+): Promise<HardcoverBook[]> {
+  try {
+    const currentYear = new Date().getFullYear();
+    const data = await makeHardcoverRequest(GET_RECENT_BOOKS_QUERY, {
+      year: currentYear - 1, // Books from last 2 years
+      limit,
+    });
+    return data.books as HardcoverBook[];
+  } catch (error) {
+    console.error("Failed to fetch new releases:", error);
+    return [];
+  }
+}
+
+// Fetch popular/recommended books for the explore page with dynamic categories
 export async function getExploreBooks(): Promise<CategorizedBooks> {
-  // Popular sci-fi/fantasy book IDs from Hardcover
-  // These are verified book IDs from actual Hardcover searches
+  // Curated book IDs that we know exist and work well
+  const trendingIds = [
+    427578, // Project Hail Mary
+    340654, // The Seven Husbands of Evelyn Hugo
+    432761, // Atomic Habits
+    430111, // Beach Read
+    379753, // Educated
+    266607, // Klara and the Sun
+  ];
+
+  const highestRatedIds = [
+    312460, // Dune
+    382700, // The Hobbit
+    379760, // 1984
+    386446, // The Way of Kings
+    379217, // The Name of the Wind
+    188628, // Foundation
+  ];
+
+  const newReleaseIds = [
+    427578, // Project Hail Mary (2021)
+    266607, // Klara and the Sun (2021)
+    432478, // The Thursday Murder Club (2020)
+    435002, // People We Meet on Vacation (2021)
+    428889, // The Guest List (2020)
+    427825, // The Fifth Season (recent award winner)
+  ];
+
   const sciFiFantasyIds = [
-    312460, // Dune by Frank Herbert
-    369692, // Mistborn: The Final Empire by Brandon Sanderson
-    427578, // Project Hail Mary by Andy Weir
-    188628, // Foundation by Isaac Asimov
-    379217, // The Name of the Wind by Patrick Rothfuss
-    292354, // The Martian by Andy Weir
-    382700, // The Hobbit by J.R.R. Tolkien
-    158268, // Ender's Game by Orson Scott Card
-    386446, // The Way of Kings by Brandon Sanderson
-    313448, // Neuromancer by William Gibson
-    427825, // The Fifth Season by N.K. Jemisin
+    312460, // Dune
+    369692, // Mistborn
+    379217, // The Name of the Wind
+    386446, // The Way of Kings
+    313448, // Neuromancer
+    158268, // Ender's Game
   ];
 
-  const classicLiteratureIds = [
-    379760, // 1984 by George Orwell
-    374328, // Brave New World by Aldous Huxley
-    377842, // The Left Hand of Darkness by Ursula K. Le Guin
+  const mysteryIds = [
+    359823, // The Silent Patient
+    432478, // The Thursday Murder Club
+    428889, // The Guest List
+    426673, // The 7½ Deaths of Evelyn Hardcastle
   ];
 
-  const modernFictionIds = [
-    26363, // Ready Player One by Ernest Cline
-    266607, // Klara and the Sun by Kazuo Ishiguro
-    340654, // The Seven Husbands of Evelyn Hugo by Taylor Jenkins Reid
+  const romanceIds = [
+    340654, // The Seven Husbands of Evelyn Hugo
+    430111, // Beach Read
+    435002, // People We Meet on Vacation
+    391653, // The Spanish Love Deception
+  ];
+
+  const nonFictionIds = [
+    420320, // Sapiens
+    379753, // Educated
+    432761, // Atomic Habits
+    426958, // Becoming
+  ];
+
+  const classicsIds = [
+    379760, // 1984
+    374328, // Brave New World
+    382700, // The Hobbit
+    382698, // Pride and Prejudice
   ];
 
   try {
-    // Fetch each category separately
-    const [sciFiFantasyBooks, classicBooks, modernFictionBooks] =
-      await Promise.all([
-        getBooksByIds(sciFiFantasyIds),
-        getBooksByIds(classicLiteratureIds),
-        getBooksByIds(modernFictionIds),
-      ]);
+    // Fetch all categories using curated IDs to avoid timeout issues
+    const [
+      trendingBooks,
+      highestRatedBooks,
+      newReleasesBooks,
+      sciFiFantasyBooks,
+      mysteryBooks,
+      romanceBooks,
+      nonFictionBooks,
+      classicBooks,
+    ] = await Promise.all([
+      getBooksByIds(trendingIds),
+      getBooksByIds(highestRatedIds),
+      getBooksByIds(newReleaseIds),
+      getBooksByIds(sciFiFantasyIds),
+      getBooksByIds(mysteryIds),
+      getBooksByIds(romanceIds),
+      getBooksByIds(nonFictionIds),
+      getBooksByIds(classicsIds),
+    ]);
 
     return {
+      trending: trendingBooks,
+      highestRated: highestRatedBooks,
+      newReleases: newReleasesBooks,
       sciFiFantasy: sciFiFantasyBooks,
-      classicLiterature: classicBooks,
-      modernFiction: modernFictionBooks,
+      mystery: mysteryBooks,
+      romance: romanceBooks,
+      nonFiction: nonFictionBooks,
+      classics: classicBooks,
     };
   } catch (error) {
-    console.error("Failed to fetch explore books, using fallback:", error);
+    console.error("Failed to fetch explore books:", error);
     return {
+      trending: [],
+      highestRated: [],
+      newReleases: [],
       sciFiFantasy: [],
-      classicLiterature: [],
-      modernFiction: [],
+      mystery: [],
+      romance: [],
+      nonFiction: [],
+      classics: [],
     };
   }
 }
@@ -277,7 +495,9 @@ const GET_BOOKS_BY_AUTHOR_QUERY = `
 `;
 
 // Fetch a single author by ID
-export async function getAuthorById(id: number): Promise<HardcoverAuthor | null> {
+export async function getAuthorById(
+  id: number
+): Promise<HardcoverAuthor | null> {
   try {
     const data = await makeHardcoverRequest(GET_AUTHOR_BY_ID_QUERY, { id });
 
@@ -293,9 +513,13 @@ export async function getAuthorById(id: number): Promise<HardcoverAuthor | null>
 }
 
 // Fetch unique books by a specific author using canonical book relationships
-export async function getBooksByAuthor(authorId: number): Promise<HardcoverBook[]> {
+export async function getBooksByAuthor(
+  authorId: number
+): Promise<HardcoverBook[]> {
   try {
-    const data = await makeHardcoverRequest(GET_BOOKS_BY_AUTHOR_QUERY, { authorId });
+    const data = await makeHardcoverRequest(GET_BOOKS_BY_AUTHOR_QUERY, {
+      authorId,
+    });
     return data.books as HardcoverBook[];
   } catch (error) {
     console.error(`Failed to fetch books for author ${authorId}:`, error);

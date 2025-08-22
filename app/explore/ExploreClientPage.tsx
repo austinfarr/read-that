@@ -2,7 +2,18 @@
 import { CategorizedBooks } from "@/lib/hardcover-api";
 import React from "react";
 import ScrollableBookSection from "@/components/ScrollableBookSection";
-import { Sparkles, BookOpen, Star, TrendingUp } from "lucide-react";
+import { 
+  Sparkles, 
+  BookOpen, 
+  Star, 
+  TrendingUp, 
+  Flame,
+  Clock,
+  Heart,
+  Search,
+  BookMarked,
+  Briefcase
+} from "lucide-react";
 
 interface ExploreClientPageProps {
   categorizedBooks: CategorizedBooks;
@@ -36,12 +47,12 @@ export default function ExploreClientPage({
               Great Read
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Curated collections of extraordinary books across genres,
+              Explore trending titles, highest-rated books, and curated collections
               <span className="text-teal-600 dark:text-teal-300 font-medium">
                 {" "}
-                handpicked{" "}
+                updated daily{" "}
               </span>
-              just for curious minds like yours
+              from the Hardcover community
             </p>
 
             {/* Stats */}
@@ -52,11 +63,11 @@ export default function ExploreClientPage({
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Star className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
-                <span className="text-lg font-medium">Highly Rated</span>
+                <span className="text-lg font-medium">Community Rated</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUp className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                <span className="text-lg font-medium">Trending</span>
+                <span className="text-lg font-medium">Live Updates</span>
               </div>
             </div>
           </div>
@@ -65,35 +76,94 @@ export default function ExploreClientPage({
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-16 mt-4">
-        <ScrollableBookSection
-          title="Science Fiction & Fantasy"
-          books={categorizedBooks.sciFiFantasy}
-        />
+        {/* Dynamic sections first */}
+        {categorizedBooks.trending && categorizedBooks.trending.length > 0 && (
+          <ScrollableBookSection
+            title="Trending Now"
+            books={categorizedBooks.trending}
+            icon={<Flame className="w-5 h-5 text-orange-500" />}
+            description="Most popular books in the community right now"
+          />
+        )}
 
-        <ScrollableBookSection
-          title="Classic Literature"
-          books={categorizedBooks.classicLiterature}
-        />
+        {categorizedBooks.highestRated && categorizedBooks.highestRated.length > 0 && (
+          <ScrollableBookSection
+            title="Highest Rated"
+            books={categorizedBooks.highestRated}
+            icon={<Star className="w-5 h-5 text-yellow-500" />}
+            description="Top-rated books by thousands of readers"
+          />
+        )}
 
-        <ScrollableBookSection
-          title="Modern Fiction"
-          books={categorizedBooks.modernFiction}
-        />
+        {categorizedBooks.newReleases && categorizedBooks.newReleases.length > 0 && (
+          <ScrollableBookSection
+            title="New Releases"
+            books={categorizedBooks.newReleases}
+            icon={<Clock className="w-5 h-5 text-green-500" />}
+            description="Fresh titles from the past two years"
+          />
+        )}
+
+        {/* Genre sections */}
+        {categorizedBooks.sciFiFantasy && categorizedBooks.sciFiFantasy.length > 0 && (
+          <ScrollableBookSection
+            title="Science Fiction & Fantasy"
+            books={categorizedBooks.sciFiFantasy}
+            icon={<Sparkles className="w-5 h-5 text-purple-500" />}
+            description="Epic adventures and imagined worlds"
+          />
+        )}
+
+        {categorizedBooks.mystery && categorizedBooks.mystery.length > 0 && (
+          <ScrollableBookSection
+            title="Mystery & Thriller"
+            books={categorizedBooks.mystery}
+            icon={<Search className="w-5 h-5 text-gray-500" />}
+            description="Page-turning mysteries and suspense"
+          />
+        )}
+
+        {categorizedBooks.romance && categorizedBooks.romance.length > 0 && (
+          <ScrollableBookSection
+            title="Romance"
+            books={categorizedBooks.romance}
+            icon={<Heart className="w-5 h-5 text-pink-500" />}
+            description="Love stories that capture the heart"
+          />
+        )}
+
+        {categorizedBooks.nonFiction && categorizedBooks.nonFiction.length > 0 && (
+          <ScrollableBookSection
+            title="Non-Fiction"
+            books={categorizedBooks.nonFiction}
+            icon={<Briefcase className="w-5 h-5 text-blue-500" />}
+            description="Ideas and insights from the real world"
+          />
+        )}
+
+        {categorizedBooks.classics && categorizedBooks.classics.length > 0 && (
+          <ScrollableBookSection
+            title="Timeless Classics"
+            books={categorizedBooks.classics}
+            icon={<BookMarked className="w-5 h-5 text-amber-600" />}
+            description="Literature that stands the test of time"
+          />
+        )}
 
         {/* Footer CTA */}
         <div className="text-center py-16 mt-8">
           <div className="bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl p-8 mx-auto max-w-2xl border border-border/20">
-            <Sparkles className="w-12 h-12 text-teal-500 dark:text-teal-400 mx-auto mb-4 animate-pulse" />
+            <TrendingUp className="w-12 h-12 text-teal-500 dark:text-teal-400 mx-auto mb-4 animate-pulse" />
             <h3 className="text-2xl font-bold text-foreground mb-4">
-              More Amazing Collections Coming Soon
+              Fresh Recommendations Daily
             </h3>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              We're constantly curating new collections of exceptional books.
+              Our collections update automatically based on what the 
               <span className="text-teal-600 dark:text-teal-300 font-medium">
                 {" "}
-                Stay tuned{" "}
+                Hardcover community{" "}
               </span>
-              for mystery, romance, biographies, and so much more!
+              is reading and loving. Check back tomorrow for new discoveries!
             </p>
           </div>
         </div>

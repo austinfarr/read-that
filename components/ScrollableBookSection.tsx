@@ -8,11 +8,15 @@ import { HardcoverBook, Book } from "@/types/book";
 interface ScrollableBookSectionProps {
   title: string;
   books: HardcoverBook[];
+  icon?: React.ReactNode;
+  description?: string;
 }
 
 export default function ScrollableBookSection({
   title,
   books,
+  icon,
+  description,
 }: ScrollableBookSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -39,9 +43,14 @@ export default function ScrollableBookSection({
         <div className="flex items-center gap-2 sm:gap-3 mb-2">
           <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-gradient-to-b from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full" />
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{title}</h2>
-          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-500 dark:text-teal-400 animate-pulse" />
+          {icon || <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-500 dark:text-teal-400 animate-pulse" />}
         </div>
-        <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full ml-4 sm:ml-6 md:ml-7" />
+        {description && (
+          <p className="text-sm text-muted-foreground ml-4 sm:ml-6 md:ml-7 mt-1">
+            {description}
+          </p>
+        )}
+        <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-teal-500 to-purple-500 dark:from-teal-400 dark:to-purple-400 rounded-full ml-4 sm:ml-6 md:ml-7 mt-2" />
       </div>
       <div className="relative scroll-section-container group/scroll bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-border/20 backdrop-blur-sm">
         {/* Left Arrow */}
