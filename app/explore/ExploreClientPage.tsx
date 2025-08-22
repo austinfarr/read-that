@@ -65,37 +65,37 @@ export default function ExploreClientPage({
         <div className="container mx-auto pt-44 pb-12 px-4 relative">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
-              <Users className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
+              <Sparkles className="w-8 h-8 text-teal-500 dark:text-teal-400 mr-3 animate-pulse" />
               <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground via-blue-600 to-teal-600 dark:from-white dark:via-blue-100 dark:to-teal-200 bg-clip-text text-transparent">
-                Community Curated
+                Discover Your Next
               </h1>
-              <Trophy className="w-8 h-8 text-purple-500 dark:text-purple-400 ml-3 animate-pulse" />
+              <Sparkles className="w-8 h-8 text-purple-500 dark:text-purple-400 ml-3 animate-pulse" />
             </div>
             <h2 className="text-5xl font-bold bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500 dark:from-teal-400 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-6">
-              Book Collections
+              Great Read
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Discover expertly curated book lists from
+              Curated collections of extraordinary books across genres,
               <span className="text-teal-600 dark:text-teal-300 font-medium">
                 {" "}
-                NPR, The New York Times, Esquire{" "}
+                handpicked{" "}
               </span>
-              and passionate readers in the Hardcover community
+              just for curious minds like yours
             </p>
 
             {/* Stats */}
             <div className="flex items-center justify-center gap-8 mt-8">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <BookOpen className="w-5 h-5 text-teal-500 dark:text-teal-400" />
-                <span className="text-lg font-medium">{lists.length} Curated Lists</span>
+                <span className="text-lg font-medium">1000+ Books</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Heart className="w-5 h-5 text-red-500 dark:text-red-400" />
-                <span className="text-lg font-medium">Community Loved</span>
+                <Star className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                <span className="text-lg font-medium">Highly Rated</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Award className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
-                <span className="text-lg font-medium">Award Winners</span>
+                <TrendingUp className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                <span className="text-lg font-medium">Trending</span>
               </div>
             </div>
           </div>
