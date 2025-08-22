@@ -1,9 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import debounce from "lodash/debounce";
-import { Search, ChevronDown, Book, User, Users } from "lucide-react";
+import { Search, Book, User, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import React from "react";
@@ -208,30 +208,26 @@ export function SearchBar() {
         <PopoverAnchor asChild>
           <div className="relative w-full hidden md:block">
             <div className="flex">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="rounded-r-none border-r-0 px-3 shrink-0"
-                  >
-                    {React.createElement(searchModeConfig[searchMode].icon, { className: "h-4 w-4 mr-1" })}
-                    {searchModeConfig[searchMode].label}
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
+              <Select value={searchMode} onValueChange={(value: SearchMode) => setSearchMode(value)}>
+                <SelectTrigger className="w-[110px] rounded-r-none border-r-0 shrink-0">
+                  <SelectValue>
+                    <div className="flex items-center">
+                      {React.createElement(searchModeConfig[searchMode].icon, { className: "h-4 w-4 mr-1" })}
+                      {searchModeConfig[searchMode].label}
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
                   {(Object.keys(searchModeConfig) as SearchMode[]).map((mode) => (
-                    <DropdownMenuItem
-                      key={mode}
-                      onClick={() => setSearchMode(mode)}
-                      className="cursor-pointer"
-                    >
-                      {React.createElement(searchModeConfig[mode].icon, { className: "h-4 w-4 mr-2" })}
-                      {searchModeConfig[mode].label}
-                    </DropdownMenuItem>
+                    <SelectItem key={mode} value={mode}>
+                      <div className="flex items-center">
+                        {React.createElement(searchModeConfig[mode].icon, { className: "h-4 w-4 mr-2" })}
+                        {searchModeConfig[mode].label}
+                      </div>
+                    </SelectItem>
                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </SelectContent>
+              </Select>
               <Input
                 type="text"
                 placeholder={searchModeConfig[searchMode].placeholder}
